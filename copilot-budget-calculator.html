@@ -133,6 +133,23 @@ header p {
   color: var(--text-muted);
   margin-top: 2px;
 }
+.dollar-wrap {
+  position: relative;
+  display: flex;
+}
+.dollar-wrap::before {
+  content: "$";
+  position: absolute;
+  inset-inline-start: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--input-text);
+  font-weight: 600;
+  font-size: 14px;
+  pointer-events: none;
+  z-index: 1;
+}
+.field .dollar-wrap input[type="number"] { flex: 1; width: 100%; padding-inline-start: 24px; }
 .field input[type="number"], .field select {
   padding: 8px 10px;
   border: 1.5px solid var(--input-border);
@@ -393,13 +410,13 @@ footer {
         <span class="hint">Paid Enterprise licenses</span>
       </div>
       <div class="field">
-        <label for="licenseFeesDisplay">Total monthly license fees ($)<span class="tip" tabindex="0">i<span class="tip-content">Calculated automatically from the seat counts and license costs: (Business seats × Business cost) + (Enterprise seats × Enterprise cost). This is the recurring license charge, before any metered overage.</span></span></label>
-        <input type="number" id="licenseFeesDisplay" readonly tabindex="-1" value="0">
+        <label for="licenseFeesDisplay">Total Monthly License Fees ($)<span class="tip" tabindex="0">i<span class="tip-content">Calculated automatically from the seat counts and license costs: (Business seats × Business cost) + (Enterprise seats × Enterprise cost). This is the recurring license charge, before any metered overage.</span></span></label>
+        <div class="dollar-wrap"><input type="number" id="licenseFeesDisplay" readonly tabindex="-1" value="0"></div>
         <span class="hint">Auto-calculated from seats — read only</span>
       </div>
       <div class="field">
         <label for="totalBudget">Total Customer Budget ($/month)<span class="tip" tabindex="0">i<span class="tip-content">The total monthly amount the customer is willing to spend on GitHub Copilot — license fees <em>plus</em> metered overage combined. The enterprise budget is derived as this amount minus license fees. <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing" target="_blank" rel="noopener">Budgets for usage-based billing ↗</a></span></span></label>
-        <input type="number" id="totalBudget" min="0" step="100" value="4000">
+        <div class="dollar-wrap"><input type="number" id="totalBudget" min="0" step="100" value="4000"></div>
         <span class="hint">Total monthly ceiling, including license fees</span>
       </div>
       <div class="field">
@@ -410,10 +427,11 @@ footer {
       <div class="field">
         <label for="multiplier">ULB strategy<span class="tip" tabindex="0">i<span class="tip-content">The User-Level Budget caps each user's total AI credit consumption and is always a hard stop. The multiplier sets the ULB as a factor of the blended per-license pool share, controlling how much spillover heavier users can absorb. <a href="https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-for-enterprise/manage-billing-for-enterprise/optimize-budget-configuration" target="_blank" rel="noopener">Optimizing budget configuration ↗</a></span></span></label>
         <select id="multiplier">
-          <option value="1.0">Conservative — 1.0× per-license share</option>
-          <option value="1.5" selected>Balanced — 1.5× per-license share</option>
-          <option value="2.0">Moderate — 2.0× per-license share</option>
-          <option value="2.5">Aggressive — 2.5× per-license share</option>
+          <option value="1.0">Limited — 1.0× per-license share</option>
+          <option value="1.5">Conservative — 1.5× per-license share</option>
+          <option value="2.0" selected>Balanced — 2.0× per-license share</option>
+          <option value="2.5">Moderate — 2.5× per-license share</option>
+          <option value="3.0">Aggressive — 3.0× per-license share</option>
         </select>
         <span class="hint">How much spillover power users can absorb</span>
       </div>
@@ -471,17 +489,12 @@ footer {
           <td class="postpromo" id="poolCreditsPost">–</td>
         </tr>
         <tr>
-          <td>Total shared pool ($)</td>
-          <td class="promo" id="poolDollarsPromo">–</td>
-          <td class="postpromo" id="poolDollarsPost">–</td>
-        </tr>
-        <tr>
           <td>Blended per-license share ($)</td>
           <td class="promo" id="perLicSharePromo">–</td>
           <td class="postpromo" id="perLicSharePost">–</td>
         </tr>
         <tr>
-          <td>Monthly license fees ($)</td>
+          <td>Total Monthly License Fees ($)</td>
           <td class="promo" id="licenseFeesPromo">–</td>
           <td class="postpromo" id="licenseFeesPost">–</td>
         </tr>
@@ -618,10 +631,10 @@ function computePeriod(period) {
 function buildStrategyAlert() {
   const multiplier = getVal('multiplier');
   if (multiplier > 1.0) return '';
-  return '<div class="alert alert-warn"><strong>Conservative ULB (1.0×) is not recommended</strong>' +
+  return '<div class="alert alert-warn"><strong>Limited ULB (1.0×) is not recommended</strong>' +
     'At 1.0× the Universal ULB equals the blended per-license pool share, so every user is capped at exactly the average allowance. ' +
     'Real usage is uneven — heavier users routinely exceed the average while lighter users leave credits unused. With no headroom, your power users get blocked even though the shared pool still has unspent capacity from quieter teammates, which defeats the purpose of a shared pool. ' +
-    'Most teams should use <strong>Balanced (1.5×)</strong> or higher and let the enterprise budget — not an overly tight ULB — govern total spend.</div>';
+    'Most teams should use <b>Balanced (2.0×)</b> or higher and let the enterprise budget — not an overly tight ULB — govern total spend.</div>';
 }
 
 function buildAlert(period, r, label) {
@@ -679,13 +692,13 @@ function renderEffectivity() {
 
   let note, noteClass;
   if (eff.periodKind === 'pre') {
-    note = 'This date is <strong>before the promo period</strong>, which starts June 1, 2026. Promo allowances apply from June 1, 2026 — the figures below use promo values.';
+    note = 'This date is <b>before the promo period</b>, which starts June 1, 2026. Promo allowances apply from June 1, 2026 — the figures below use promo values.';
     noteClass = 'alert-warn';
   } else if (eff.periodKind === 'promo') {
-    note = 'As of this date you are in the <strong>promo period</strong> (June 1 – Sept 1, 2026). The promo recommendation applies through Aug 31, 2026; <strong>post-promo begins Sept 1, 2026</strong> — plan to re-tune then.';
+    note = 'As of this date you are in the <b>promo period</b> (June 1 – Sept 1, 2026). The promo recommendation applies through Aug 31, 2026; <b>post-promo begins Sept 1, 2026</b> — plan to re-tune then.';
     noteClass = 'alert-success';
   } else {
-    note = 'As of this date you are in the <strong>post-promo period</strong> (after Sept 1, 2026). Figures below use post-promo values.';
+    note = 'As of this date you are in the <b>post-promo period</b> (after Sept 1, 2026). Figures below use post-promo values.';
     noteClass = 'alert-success';
   }
 
@@ -712,8 +725,6 @@ function render() {
 
   document.getElementById('poolCreditsPromo').textContent = fmtN(promo.poolCredits);
   document.getElementById('poolCreditsPost').textContent = fmtN(post.poolCredits);
-  document.getElementById('poolDollarsPromo').textContent = fmt$(promo.poolDollars);
-  document.getElementById('poolDollarsPost').textContent = fmt$(post.poolDollars);
   document.getElementById('perLicSharePromo').textContent = fmt$2(promo.perLicShare);
   document.getElementById('perLicSharePost').textContent = fmt$2(post.perLicShare);
   document.getElementById('licenseFeesPromo').textContent = fmt$(promo.licenseFees);

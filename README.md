@@ -15,7 +15,7 @@ Tools and references for sizing GitHub Copilot Business and Enterprise budgets u
 2. Enter the customer's Business and Enterprise seat counts. Total monthly license fees are calculated automatically.
 3. Enter the customer's **Total Customer Budget** — the total dollar amount they're willing to spend per month, including license fees.
 4. Set the **Budget set date** (defaults to the first of the current month). Budgets are effective from the day they're set and cannot look back, so a mid-month start only covers the remaining days of that first month.
-5. Pick a ULB strategy (Conservative / Balanced / Moderate / Aggressive).
+5. Pick a ULB strategy (Limited / Conservative / Balanced / Moderate / Aggressive).
 6. Compare the **Promo Period** (Jun 1 – Sep 1, 2026) and **Post-Promo Period** columns to see how their costs will shift when the promo ends.
 7. Use the recommended Universal ULB and Enterprise Budget values when configuring GitHub admin settings.
 
