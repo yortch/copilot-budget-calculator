@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>GitHub Copilot Budget Sizing Calculator</title>
+<style>
+:root {
+  --bg: #f6f8fa;
+  --card-bg: #ffffff;
+  --text: #1f2328;
+  --text-muted: #656d76;
+  --border: #d0d7de;
+  --accent: #0969da;
+  --accent-dark: #0550ae;
+  --header-bg: #1f4e78;
+  --header-text: #ffffff;
+  --input-bg: #fff8c5;
+  --input-border: #d4a72c;
+  --input-text: #0550ae;
+  --success-bg: #dafbe1;
+  --success-text: #1a7f37;
+  --warn-bg: #fff8c5;
+  --warn-text: #9a6700;
+  --error-bg: #ffebe9;
+  --error-text: #cf222e;
+  --promo-bg: #ddf4ff;
+  --postpromo-bg: #f6f8fa;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --card-bg: #161b22;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --border: #30363d;
+    --accent: #2f81f7;
+    --accent-dark: #58a6ff;
+    --header-bg: #1f4e78;
+    --header-text: #ffffff;
+    --input-bg: #2d2410;
+    --input-border: #d4a72c;
+    --input-text: #79c0ff;
+    --success-bg: #033a16;
+    --success-text: #56d364;
+    --warn-bg: #3a2a00;
+    --warn-text: #d4a72c;
+    --error-bg: #4c1d1d;
+    --error-text: #ff7b72;
+    --promo-bg: #0d2438;
+    --postpromo-bg: #161b22;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px;
+}
+header {
+  background: var(--header-bg);
+  color: var(--header-text);
+  padding: 28px 24px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 6px;
+}
+.brand svg {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+header h1 {
+  margin: 0 0 4px 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+header p {
+  margin: 0;
+  opacity: 0.85;
+  font-size: 14px;
+}
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+.card h2 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.input-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+.field .hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.field input[type="number"], .field select {
+  padding: 8px 10px;
+  border: 1.5px solid var(--input-border);
+  border-radius: 6px;
+  background: var(--input-bg);
+  color: var(--input-text);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+}
+.field input[type="number"]:focus, .field select:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+details {
+  margin-top: 12px;
+  border-top: 1px dashed var(--border);
+  padding-top: 12px;
+}
+details summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  user-select: none;
+}
+details[open] summary {
+  margin-bottom: 12px;
+}
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.results-table th, .results-table td {
+  padding: 10px 14px;
+  text-align: right;
+  border-bottom: 1px solid var(--border);
+}
+.results-table th:first-child, .results-table td:first-child {
+  text-align: start;
+  font-weight: 500;
+  color: var(--text);
+}
+.results-table thead th {
+  background: var(--header-bg);
+  color: var(--header-text);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  padding: 12px 14px;
+}
+.results-table thead th:first-child {
+  text-align: start;
+}
+.results-table tbody tr.section-row td {
+  background: var(--bg);
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-muted);
+  padding: 8px 14px;
+}
+.results-table td.promo {
+  background: var(--promo-bg);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.results-table td.postpromo {
+  background: var(--postpromo-bg);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.results-table tr.highlight td.promo,
+.results-table tr.highlight td.postpromo {
+  background: var(--success-bg);
+  color: var(--success-text);
+  font-size: 15px;
+  font-weight: 700;
+}
+.alert {
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-top: 16px;
+  border-inline-start: 4px solid;
+}
+.alert-warn {
+  background: var(--warn-bg);
+  color: var(--warn-text);
+  border-color: var(--warn-text);
+}
+.alert-success {
+  background: var(--success-bg);
+  color: var(--success-text);
+  border-color: var(--success-text);
+}
+.alert strong { display: block; margin-bottom: 4px; }
+.constants-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.constants-grid .field input[type="number"] {
+  font-size: 13px;
+}
+.notes-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.notes-list li {
+  padding: 8px 0 8px 24px;
+  position: relative;
+  font-size: 13px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+.notes-list li:last-child { border-bottom: none; }
+.notes-list li::before {
+  content: "✓";
+  position: absolute;
+  inset-inline-start: 0;
+  color: var(--accent);
+  font-weight: 700;
+}
+.notes-list li.warn::before {
+  content: "⚠";
+  color: var(--warn-text);
+}
+.col-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-inline-start: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.col-tag.promo-tag { background: #0969da; color: #fff; }
+.col-tag.postpromo-tag { background: #656d76; color: #fff; }
+.tip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  margin-inline-start: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  font-style: normal;
+  cursor: help;
+  vertical-align: middle;
+  user-select: none;
+}
+.tip .tip-content {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  bottom: 150%;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  width: 250px;
+  background: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.45;
+  text-align: start;
+  z-index: 20;
+  transition: opacity 0.12s ease;
+}
+.tip .tip-content a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+.tip .tip-content a:hover { text-decoration: underline; }
+.tip:hover .tip-content,
+.tip:focus-within .tip-content { visibility: visible; opacity: 1; }
+.disclaimer {
+  background: var(--warn-bg);
+  color: var(--warn-text);
+  border: 1px solid var(--input-border);
+  border-inline-start: 5px solid var(--input-border);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  font-size: 13px;
+}
+.disclaimer strong { font-size: 14px; }
+.disclaimer a { color: var(--accent); font-weight: 600; }
+.alert-error {
+  background: var(--error-bg);
+  color: var(--error-text);
+  border-color: var(--error-text);
+}
+.footer-link { color: var(--accent); font-weight: 600; text-decoration: none; }
+.footer-link:hover { text-decoration: underline; }
+footer {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 16px 0 8px 0;
+}
+@media (max-width: 700px) {
+  .container { padding: 12px; }
+  .constants-grid { grid-template-columns: 1fr; }
+  .results-table th, .results-table td { padding: 8px 10px; font-size: 13px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="brand">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.922 16.992c-.861 1.495-5.859 5.023-11.922 5.023-6.063 0-11.061-3.528-11.922-5.023A.641.641 0 0 1 0 16.736v-2.869a.841.841 0 0 1 .053-.22c.372-.935 1.347-2.292 2.605-2.656.167-.429.414-1.055.644-1.517a10.195 10.195 0 0 1-.052-1.086c0-1.331.282-2.499 1.132-3.368.397-.406.89-.717 1.474-.952 1.399-1.136 3.392-2.093 6.122-2.093 2.731 0 4.767.957 6.166 2.093.584.235 1.077.546 1.474.952.85.869 1.132 2.037 1.132 3.368 0 .368-.014.733-.052 1.086.23.462.477 1.088.644 1.517 1.258.364 2.233 1.721 2.605 2.656a.832.832 0 0 1 .053.22v2.869a.641.641 0 0 1-.078.256ZM12.172 11h-.344a4.323 4.323 0 0 1-.355.508C10.703 12.455 9.555 13 7.965 13c-1.725 0-2.989-.359-3.782-1.259a2.005 2.005 0 0 1-.085-.104L4 11.741v6.585c1.435.779 4.514 2.179 8 2.179 3.486 0 6.565-1.4 8-2.179v-6.585l-.098-.104s-.033.045-.085.104c-.793.9-2.057 1.259-3.782 1.259-1.59 0-2.738-.545-3.508-1.492a4.323 4.323 0 0 1-.355-.508h-.016.016Zm.641-2.935c.136 1.057.403 1.913.878 2.497.442.544 1.134.938 2.344.938 1.573 0 2.292-.337 2.657-.751.384-.435.558-1.15.558-2.361 0-1.14-.243-1.847-.705-2.319-.477-.488-1.319-.862-2.824-1.025-1.487-.161-2.192.138-2.533.529-.269.307-.437.808-.438 1.578v.021c0 .265.021.562.063.893Zm-1.626 0c.042-.331.063-.628.063-.894v-.02c-.001-.77-.169-1.271-.438-1.578-.341-.391-1.046-.69-2.533-.529-1.505.163-2.347.537-2.824 1.025-.462.472-.705 1.179-.705 2.319 0 1.211.175 1.926.558 2.361.365.414 1.084.751 2.657.751 1.21 0 1.902-.394 2.344-.938.475-.584.742-1.44.878-2.497Z"/><path d="M14.5 14.25a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0v-2a1 1 0 0 1 1-1Zm-5 0a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0v-2a1 1 0 0 1 1-1Z"/></svg>
+      <h1>GitHub Copilot Budget Sizing Calculator</h1>
+    </div>
+    <p>Compare promo and post-promo costs across Business and Enterprise seats</p>
+  </header>
+
+  <div class="disclaimer">
+    <strong>⚠ Always verify before sharing externally.</strong>
+    Pricing, credit allowances, and feature availability change over time — and promo terms are time-limited and may differ by region or contract. Always confirm every number against the latest official
+    <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing" target="_blank" rel="noopener">GitHub Copilot billing documentation ↗</a>
+    before committing customer-facing figures. This tool is a sales-engineering aid, not a quote.
+  </div>
+
+  <div class="card">
+    <h2>Your Inputs</h2>
+    <div class="input-grid">
+      <div class="field">
+        <label for="businessSeats">Copilot Business seats</label>
+        <input type="number" id="businessSeats" min="0" step="1" value="100">
+        <span class="hint">Paid Business licenses</span>
+      </div>
+      <div class="field">
+        <label for="enterpriseSeats">Copilot Enterprise seats</label>
+        <input type="number" id="enterpriseSeats" min="0" step="1" value="20">
+        <span class="hint">Paid Enterprise licenses</span>
+      </div>
+      <div class="field">
+        <label for="totalBudget">Total Customer Budget ($/month)<span class="tip" tabindex="0">i<span class="tip-content">The total monthly amount the customer is willing to spend on GitHub Copilot — license fees <em>plus</em> metered overage combined. The enterprise budget is derived as this amount minus license fees. <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing" target="_blank" rel="noopener">Budgets for usage-based billing ↗</a></span></span></label>
+        <input type="number" id="totalBudget" min="0" step="100" value="4000">
+        <span class="hint">Total monthly ceiling, including license fees</span>
+      </div>
+      <div class="field">
+        <label for="multiplier">ULB strategy<span class="tip" tabindex="0">i<span class="tip-content">The User-Level Budget caps each user's total AI credit consumption and is always a hard stop. The multiplier sets the ULB as a factor of the blended per-license pool share, controlling how much spillover heavier users can absorb. <a href="https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-for-enterprise/manage-billing-for-enterprise/optimize-budget-configuration" target="_blank" rel="noopener">Optimizing budget configuration ↗</a></span></span></label>
+        <select id="multiplier">
+          <option value="1.0">Conservative — 1.0× per-license share</option>
+          <option value="1.5" selected>Balanced — 1.5× per-license share</option>
+          <option value="2.0">Moderate — 2.0× per-license share</option>
+          <option value="2.5">Aggressive — 2.5× per-license share</option>
+        </select>
+        <span class="hint">How much spillover power users can absorb</span>
+      </div>
+    </div>
+
+    <details>
+      <summary>Plan constants — shown for reference</summary>
+      <div class="constants-grid">
+        <div class="field">
+          <label for="bizCost">Business license cost ($/user/month)</label>
+          <input type="number" id="bizCost" min="0" step="1" value="19">
+        </div>
+        <div class="field">
+          <label for="entCost">Enterprise license cost ($/user/month)</label>
+          <input type="number" id="entCost" min="0" step="1" value="39">
+        </div>
+        <div class="field">
+          <label for="bizPromo">Business credits — Promo (per user/month)</label>
+          <input type="number" id="bizPromo" min="0" step="100" value="3000">
+        </div>
+        <div class="field">
+          <label for="entPromo">Enterprise credits — Promo (per user/month)</label>
+          <input type="number" id="entPromo" min="0" step="100" value="7000">
+        </div>
+        <div class="field">
+          <label for="bizPost">Business credits — Post-promo (per user/month)</label>
+          <input type="number" id="bizPost" min="0" step="100" value="1500">
+        </div>
+        <div class="field">
+          <label for="entPost">Enterprise credits — Post-promo (per user/month)</label>
+          <input type="number" id="entPost" min="0" step="100" value="3500">
+        </div>
+      </div>
+      <p class="hint" style="margin-top: 12px;">
+        Credit price is fixed at $0.01 per AI credit. These values are shown for reference — confirm them against the latest <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing" target="_blank" rel="noopener" style="color: var(--accent); font-weight: 600;">GitHub Copilot documentation ↗</a> before quoting customers.
+      </p>
+    </details>
+  </div>
+
+  <div class="card">
+    <h2>Recommendations</h2>
+    <table class="results-table">
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>Promo Period <span class="col-tag promo-tag">Now</span></th>
+          <th>Post-Promo Period <span class="col-tag postpromo-tag">Later</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="section-row"><td colspan="3">Pool &amp; License Economics</td></tr>
+        <tr>
+          <td>Total shared pool (credits)<span class="tip" tabindex="0">i<span class="tip-content">The combined monthly AI credit allowance across all seats. It is shared across the entire enterprise — not per user or per license type — and is consumed before any metered charges begin. <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing" target="_blank" rel="noopener">Learn more ↗</a></span></span></td>
+          <td class="promo" id="poolCreditsPromo">–</td>
+          <td class="postpromo" id="poolCreditsPost">–</td>
+        </tr>
+        <tr>
+          <td>Total shared pool ($)</td>
+          <td class="promo" id="poolDollarsPromo">–</td>
+          <td class="postpromo" id="poolDollarsPost">–</td>
+        </tr>
+        <tr>
+          <td>Blended per-license share ($)</td>
+          <td class="promo" id="perLicSharePromo">–</td>
+          <td class="postpromo" id="perLicSharePost">–</td>
+        </tr>
+        <tr>
+          <td>Monthly license fees ($)</td>
+          <td class="promo" id="licenseFeesPromo">–</td>
+          <td class="postpromo" id="licenseFeesPost">–</td>
+        </tr>
+
+        <tr class="section-row"><td colspan="3">User-Level Budget (ULB)</td></tr>
+        <tr>
+          <td>Recommended Universal ULB ($/user)<span class="tip" tabindex="0">i<span class="tip-content">The Universal User-Level Budget to configure in enterprise settings. It caps each user's total credit consumption (pool + metered) and is always a hard stop. <a href="https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-for-enterprise/manage-billing-for-enterprise/optimize-budget-configuration" target="_blank" rel="noopener">Configure budgets ↗</a></span></span></td>
+          <td class="promo" id="ulbPromo">–</td>
+          <td class="postpromo" id="ulbPost">–</td>
+        </tr>
+        <tr>
+          <td>Recommended Universal ULB (credits/user)</td>
+          <td class="promo" id="ulbCrPromo">–</td>
+          <td class="postpromo" id="ulbCrPost">–</td>
+        </tr>
+
+        <tr class="section-row"><td colspan="3">Overage &amp; Enterprise Budget</td></tr>
+        <tr>
+          <td>Max collective consumption ($)</td>
+          <td class="promo" id="maxCollPromo">–</td>
+          <td class="postpromo" id="maxCollPost">–</td>
+        </tr>
+        <tr>
+          <td>Max overage exposure ($)<span class="tip" tabindex="0">i<span class="tip-content">The largest possible metered spend above the pool if every user consumed up to their ULB. Your enterprise budget should be sized against this figure. <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing" target="_blank" rel="noopener">Learn more ↗</a></span></span></td>
+          <td class="promo" id="overagePromo">–</td>
+          <td class="postpromo" id="overagePost">–</td>
+        </tr>
+        <tr>
+          <td>Enterprise budget to set ($)<span class="tip" tabindex="0">i<span class="tip-content">The enterprise budget value to enter in GitHub admin settings — derived from your Total Customer Budget minus license fees, capped at max overage exposure. It only limits metered charges after the pool is exhausted, and is <em>not</em> a total monthly cap. Enable "Stop usage when budget limit is reached" (off by default) to make it a hard stop. <a href="https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-for-enterprise/manage-billing-for-enterprise" target="_blank" rel="noopener">Manage enterprise billing ↗</a></span></span></td>
+          <td class="promo" id="entBudgetPromo">–</td>
+          <td class="postpromo" id="entBudgetPost">–</td>
+        </tr>
+
+        <tr class="section-row"><td colspan="3">Bill Ceiling</td></tr>
+        <tr class="highlight">
+          <td>Maximum monthly bill ($)</td>
+          <td class="promo" id="maxBillPromo">–</td>
+          <td class="postpromo" id="maxBillPost">–</td>
+        </tr>
+        <tr>
+          <td>Effective per-user max bill ($)</td>
+          <td class="promo" id="perUserBillPromo">–</td>
+          <td class="postpromo" id="perUserBillPost">–</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div id="alertStrategy"></div>
+    <div id="alertPromo"></div>
+    <div id="alertPost"></div>
+  </div>
+
+  <div class="card">
+    <h2>Setup Checklist &amp; Key Rules</h2>
+    <ul class="notes-list">
+      <li>Enable "AI credit paid usage" policy in enterprise settings — required for any metered usage</li>
+      <li>Set the Universal ULB to the recommended value above</li>
+      <li class="warn">Enable "Stop usage when budget limit is reached" on the enterprise budget — <strong>OFF by default</strong>; without it, charges accrue past the cap</li>
+      <li>Set individual ULB overrides for named power users (or use the excluded cost center pattern)</li>
+      <li>For Power Users who must never be blocked: own cost center + enable cost center exclusion — adds to bill ceiling but bypasses enterprise cap</li>
+      <li>Lowest remaining headroom wins — a high ULB does not protect a user if the enterprise budget is exhausted</li>
+      <li>Pool is shared across the whole enterprise — not per user, not per license type</li>
+      <li>ULB is always a hard stop; there is no "continue past limit" toggle for ULBs</li>
+      <li class="warn">Re-tune both ULB and enterprise budget at the promo→post-promo transition — the same ULB will produce more overage when pool shrinks</li>
+    </ul>
+  </div>
+
+  <footer>
+    Based on <a class="footer-link" href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing" target="_blank" rel="noopener">docs.github.com/copilot/concepts/billing/budgets-for-usage-based-billing ↗</a> · Credit price $0.01
+    <div style="margin-top: 8px; font-weight: 600; color: var(--warn-text);">⚠ Always verify pricing, credits, and promo terms against the latest official GitHub documentation before sharing with customers.</div>
+  </footer>
+
+</div>
+
+<script>
+const fmt$ = (n) => n === 0 ? '$0' : (n < 0 ? '($' + Math.abs(n).toLocaleString('en-US', {maximumFractionDigits: 0}) + ')' : '$' + n.toLocaleString('en-US', {maximumFractionDigits: 0}));
+const fmt$2 = (n) => '$' + n.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+const fmtN = (n) => n.toLocaleString('en-US', {maximumFractionDigits: 0});
+
+function getVal(id) {
+  const el = document.getElementById(id);
+  const v = parseFloat(el.value);
+  return isNaN(v) ? 0 : v;
+}
+
+function computePeriod(period) {
+  const bizSeats = getVal('businessSeats');
+  const entSeats = getVal('enterpriseSeats');
+  const totalBudget = getVal('totalBudget');
+  const multiplier = getVal('multiplier');
+  const bizCost = getVal('bizCost');
+  const entCost = getVal('entCost');
+
+  const bizCredits = period === 'promo' ? getVal('bizPromo') : getVal('bizPost');
+  const entCredits = period === 'promo' ? getVal('entPromo') : getVal('entPost');
+
+  const totalSeats = bizSeats + entSeats;
+  const poolCredits = bizSeats * bizCredits + entSeats * entCredits;
+  const poolDollars = poolCredits * 0.01;
+  const licenseFees = bizSeats * bizCost + entSeats * entCost;
+  const perLicShare = totalSeats > 0 ? poolDollars / totalSeats : 0;
+  const ulb = perLicShare * multiplier;
+  const ulbCredits = ulb / 0.01;
+  const maxColl = ulb * totalSeats;
+  const maxOverage = Math.max(0, maxColl - poolDollars);
+  const availableForOverage = totalBudget - licenseFees;
+  const entBudget = Math.min(Math.max(0, availableForOverage), maxOverage);
+  const maxBill = licenseFees + entBudget;
+  const perUserBill = totalSeats > 0 ? maxBill / totalSeats : 0;
+
+  return {
+    poolCredits, poolDollars, perLicShare, licenseFees,
+    ulb, ulbCredits, maxColl, maxOverage, entBudget,
+    maxBill, perUserBill, totalBudget, availableForOverage, totalSeats
+  };
+}
+
+function buildStrategyAlert() {
+  const multiplier = getVal('multiplier');
+  if (multiplier > 1.0) return '';
+  return '<div class="alert alert-warn"><strong>Conservative ULB (1.0×) is not recommended</strong>' +
+    'At 1.0× the Universal ULB equals the blended per-license pool share, so every user is capped at exactly the average allowance. ' +
+    'Real usage is uneven — heavier users routinely exceed the average while lighter users leave credits unused. With no headroom, your power users get blocked even though the shared pool still has unspent capacity from quieter teammates, which defeats the purpose of a shared pool. ' +
+    'Most teams should use <strong>Balanced (1.5×)</strong> or higher and let the enterprise budget — not an overly tight ULB — govern total spend.</div>';
+}
+
+function buildAlert(period, r, label) {
+  if (r.totalSeats === 0) return '';
+  if (r.availableForOverage < 0) {
+    return '<div class="alert alert-error"><strong>' + label + ': Budget below license fees</strong>Your Total Customer Budget of ' + fmt$(r.totalBudget) + ' does not cover the ' + fmt$(r.licenseFees) + ' in monthly license fees. Raise the total budget to at least the license fees before any overage can be allowed.</div>';
+  }
+  if (r.maxOverage === 0) {
+    return '<div class="alert alert-success"><strong>' + label + ': Pool covers all usage</strong>At a ' + document.getElementById('multiplier').selectedOptions[0].text.split(' — ')[0].toLowerCase() + ' ULB, your shared pool is sufficient and no overage is possible. The ' + fmt$(r.availableForOverage) + ' of headroom above license fees in your total budget will not be drawn down.</div>';
+  }
+  if (r.availableForOverage < r.maxOverage) {
+    return '<div class="alert alert-warn"><strong>' + label + ': Budget binds before ULB</strong>After license fees, your total budget leaves ' + fmt$(r.availableForOverage) + ' for overage — below the ' + fmt$(r.maxOverage) + ' max exposure. Users will be blocked when the enterprise budget runs out, even with ULB headroom remaining. Raise the total budget or lower the ULB multiplier to align them.</div>';
+  }
+  if (r.availableForOverage > r.maxOverage) {
+    return '<div class="alert alert-success"><strong>' + label + ': Budget is conservative</strong>After license fees, your total budget leaves ' + fmt$(r.availableForOverage) + ' for overage — above the ' + fmt$(r.maxOverage) + ' max exposure. ULBs will bind first; the extra budget will not be consumed. Consider raising the ULB multiplier to give users more headroom.</div>';
+  }
+  return '<div class="alert alert-success"><strong>' + label + ': ULB and budget are aligned</strong>After license fees, the overage room in your total budget exactly matches the max exposure at this ULB level.</div>';
+}
+
+function render() {
+  const promo = computePeriod('promo');
+  const post = computePeriod('post');
+
+  document.getElementById('poolCreditsPromo').textContent = fmtN(promo.poolCredits);
+  document.getElementById('poolCreditsPost').textContent = fmtN(post.poolCredits);
+  document.getElementById('poolDollarsPromo').textContent = fmt$(promo.poolDollars);
+  document.getElementById('poolDollarsPost').textContent = fmt$(post.poolDollars);
+  document.getElementById('perLicSharePromo').textContent = fmt$2(promo.perLicShare);
+  document.getElementById('perLicSharePost').textContent = fmt$2(post.perLicShare);
+  document.getElementById('licenseFeesPromo').textContent = fmt$(promo.licenseFees);
+  document.getElementById('licenseFeesPost').textContent = fmt$(post.licenseFees);
+
+  document.getElementById('ulbPromo').textContent = fmt$2(promo.ulb);
+  document.getElementById('ulbPost').textContent = fmt$2(post.ulb);
+  document.getElementById('ulbCrPromo').textContent = fmtN(promo.ulbCredits);
+  document.getElementById('ulbCrPost').textContent = fmtN(post.ulbCredits);
+
+  document.getElementById('maxCollPromo').textContent = fmt$(promo.maxColl);
+  document.getElementById('maxCollPost').textContent = fmt$(post.maxColl);
+  document.getElementById('overagePromo').textContent = fmt$(promo.maxOverage);
+  document.getElementById('overagePost').textContent = fmt$(post.maxOverage);
+  document.getElementById('entBudgetPromo').textContent = fmt$(promo.entBudget);
+  document.getElementById('entBudgetPost').textContent = fmt$(post.entBudget);
+
+  document.getElementById('maxBillPromo').textContent = fmt$(promo.maxBill);
+  document.getElementById('maxBillPost').textContent = fmt$(post.maxBill);
+  document.getElementById('perUserBillPromo').textContent = fmt$2(promo.perUserBill);
+  document.getElementById('perUserBillPost').textContent = fmt$2(post.perUserBill);
+
+  document.getElementById('alertStrategy').innerHTML = buildStrategyAlert();
+  document.getElementById('alertPromo').innerHTML = buildAlert('promo', promo, 'Promo period');
+  document.getElementById('alertPost').innerHTML = buildAlert('post', post, 'Post-promo period');
+}
+
+const inputs = ['businessSeats', 'enterpriseSeats', 'totalBudget', 'multiplier',
+                'bizCost', 'entCost', 'bizPromo', 'entPromo', 'bizPost', 'entPost'];
+inputs.forEach(id => {
+  document.getElementById(id).addEventListener('input', render);
+  document.getElementById(id).addEventListener('change', render);
+});
+
+render();
+</script>
+</body>
+</html>
