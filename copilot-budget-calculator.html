@@ -523,7 +523,7 @@ footer {
           <td class="postpromo" id="overagePost">–</td>
         </tr>
         <tr>
-          <td>Enterprise budget to set ($)<span class="tip" tabindex="0">i<span class="tip-content">The enterprise budget value to enter in GitHub admin settings — derived from your Total Customer Budget minus license fees, capped at max overage exposure. It only limits metered charges after the pool is exhausted, and is <em>not</em> a total monthly cap. Enable "Stop usage when budget limit is reached" (off by default) to make it a hard stop. <a href="https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-for-enterprise/manage-billing-for-enterprise" target="_blank" rel="noopener">Manage enterprise billing ↗</a></span></span></td>
+          <td>Enterprise budget to set ($)<span class="tip" tabindex="0">i<span class="tip-content">The enterprise budget value to enter in GitHub admin settings — derived from your Total Customer Budget minus license fees, capped at max overage exposure. It only limits metered charges after the pool is exhausted, and is <em>not</em> a total monthly cap. Enable "Stop usage when budget limit is reached" (off by default) to make it a hard stop. <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#enterprise-budget" target="_blank" rel="noopener">Enterprise budget ↗</a></span></span></td>
           <td class="promo" id="entBudgetPromo">–</td>
           <td class="postpromo" id="entBudgetPost">–</td>
         </tr>
@@ -628,6 +628,10 @@ function computePeriod(period) {
   };
 }
 
+function entBudgetDisplay(r) {
+  return r.availableForOverage < 0 ? 'N/A' : fmt$(r.entBudget);
+}
+
 function buildStrategyAlert() {
   const multiplier = getVal('multiplier');
   if (multiplier > 1.0) return '';
@@ -702,21 +706,24 @@ function renderEffectivity() {
     noteClass = 'alert-success';
   }
 
+  const entBudgetStr = entBudgetDisplay(eff.active);
   const partialRows = eff.factor < 1
     ? '<tr><td>First month is partial (remaining days)</td><td class="promo">' + eff.daysRemaining + ' of ' + eff.daysInMonth + ' days (' + fmtPct(eff.factor) + ')</td></tr>' +
       '<tr><td>First-month max overage exposure (estimate, remaining days)</td><td class="promo">' + fmt$(eff.proratedOverage) + '</td></tr>' +
-      '<tr><td>First-month effective budget (estimate, remaining days)<span class="tip" tabindex="0">i<span class="tip-content">An estimate of overage spend governed during the partial first month only. The recurring budget you configure in GitHub stays at the full-month value above — GitHub budgets are monthly caps and do not auto-prorate.</span></span></td><td class="promo">' + fmt$(eff.proratedEntBudget) + '</td></tr>'
+      '<tr><td>First-month effective budget (estimate, remaining days)<span class="tip" tabindex="0">i<span class="tip-content">An estimate of overage spend governed during the partial first month only. The recurring budget you configure in GitHub stays at the full-month value above — GitHub budgets are monthly caps and do not auto-prorate.</span></span></td><td class="promo">' + (eff.active.availableForOverage < 0 ? 'N/A' : fmt$(eff.proratedEntBudget)) + '</td></tr>'
     : '<tr><td>First month is full</td><td class="promo">' + eff.daysInMonth + ' of ' + eff.daysInMonth + ' days (100%)</td></tr>';
 
   body.innerHTML =
     '<p class="hint" style="margin-top:0;">Budget set date: <strong>' + dateStr + '</strong> — ' + eff.periodLabel + '</p>' +
     '<table class="results-table"><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody>' +
-    '<tr class="highlight"><td>Recurring monthly enterprise budget to configure</td><td class="promo">' + fmt$(eff.active.entBudget) + '</td></tr>' +
+    '<tr class="highlight"><td>Recurring monthly enterprise budget to configure</td><td class="promo">' + entBudgetStr + '</td></tr>' +
     '<tr><td>Recommended Universal ULB ($/user, monthly)</td><td class="promo">' + fmt$2(eff.active.ulb) + '</td></tr>' +
     partialRows +
     '</tbody></table>' +
     '<div class="alert ' + noteClass + '"><strong>Effective from ' + dateStr + '</strong>' + note + '</div>' +
-    '<div class="alert alert-warn"><strong>Budgets cannot look back</strong>The budget governs usage only from ' + dateStr + ' forward. Any usage earlier in the month is not covered. The recurring monthly budget to set in GitHub admin is the full-month value (' + fmt$(eff.active.entBudget) + '); the partial-month figures above are estimates for the first month only.</div>';
+    (eff.active.availableForOverage < 0
+      ? '<div class="alert alert-error"><strong>No enterprise budget to set</strong>The Total Customer Budget does not cover the monthly license fees, so there is nothing left for overage. Do <b>not</b> set the enterprise budget to $0 — a $0 budget blocks all metered usage immediately. Raise the Total Customer Budget above the license fees first.</div>'
+      : '<div class="alert alert-warn"><strong>Budgets cannot look back</strong>The budget governs usage only from ' + dateStr + ' forward. Any usage earlier in the month is not covered. The recurring monthly budget to set in GitHub admin is the full-month value (' + entBudgetStr + '); the partial-month figures above are estimates for the first month only.</div>');
 }
 
 function render() {
@@ -739,8 +746,8 @@ function render() {
   document.getElementById('maxCollPost').textContent = fmt$(post.maxColl);
   document.getElementById('overagePromo').textContent = fmt$(promo.maxOverage);
   document.getElementById('overagePost').textContent = fmt$(post.maxOverage);
-  document.getElementById('entBudgetPromo').textContent = fmt$(promo.entBudget);
-  document.getElementById('entBudgetPost').textContent = fmt$(post.entBudget);
+  document.getElementById('entBudgetPromo').textContent = entBudgetDisplay(promo);
+  document.getElementById('entBudgetPost').textContent = entBudgetDisplay(post);
 
   document.getElementById('maxBillPromo').textContent = fmt$(promo.maxBill);
   document.getElementById('maxBillPost').textContent = fmt$(post.maxBill);
