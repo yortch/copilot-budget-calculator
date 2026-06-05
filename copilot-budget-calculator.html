@@ -365,6 +365,8 @@ details[open] summary {
 }
 .footer-link { color: var(--accent); font-weight: 600; text-decoration: none; }
 .footer-link:hover { text-decoration: underline; }
+.label-link { color: var(--accent); text-decoration: none; }
+.label-link:hover { text-decoration: underline; }
 footer {
   text-align: center;
   font-size: 12px;
@@ -415,7 +417,7 @@ footer {
         <span class="hint">Auto-calculated from seats — read only</span>
       </div>
       <div class="field">
-        <label for="totalBudget">Total Customer Budget ($/month)<span class="tip" tabindex="0">i<span class="tip-content">The total monthly amount the customer is willing to spend on GitHub Copilot — license fees <em>plus</em> metered overage combined. The enterprise budget is derived as this amount minus license fees. <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing" target="_blank" rel="noopener">Budgets for usage-based billing ↗</a></span></span></label>
+        <label for="totalBudget"><a class="label-link" href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing" target="_blank" rel="noopener">Total Customer Budget ($/month)</a><span class="tip" tabindex="0">i<span class="tip-content">The total monthly amount the customer is willing to spend on GitHub Copilot — license fees <em>plus</em> metered overage combined. The enterprise budget is derived as this amount minus license fees. <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing" target="_blank" rel="noopener">Budgets for usage-based billing ↗</a></span></span></label>
         <div class="dollar-wrap"><input type="number" id="totalBudget" min="0" step="100" value="4000"></div>
         <span class="hint">Total monthly ceiling, including license fees</span>
       </div>
@@ -425,7 +427,7 @@ footer {
         <span class="hint">Effective from this day; cannot look back</span>
       </div>
       <div class="field">
-        <label for="multiplier">ULB strategy<span class="tip" tabindex="0">i<span class="tip-content">The User-Level Budget caps each user's total AI credit consumption and is always a hard stop. The multiplier sets the ULB as a factor of the blended per-license pool share, controlling how much spillover heavier users can absorb. <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#user-level-budget" target="_blank" rel="noopener">User-level budget ↗</a></span></span></label>
+        <label for="multiplier"><a class="label-link" href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#user-level-budget" target="_blank" rel="noopener">ULB strategy</a><span class="tip" tabindex="0">i<span class="tip-content">The User-Level Budget caps each user's total AI credit consumption and is always a hard stop. The multiplier sets the ULB as a factor of the blended per-license pool share, controlling how much spillover heavier users can absorb. <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#user-level-budget" target="_blank" rel="noopener">User-level budget ↗</a></span></span></label>
         <select id="multiplier">
           <option value="1.0">Limited — 1.0× per-license share</option>
           <option value="1.5">Conservative — 1.5× per-license share</option>
@@ -501,12 +503,12 @@ footer {
 
         <tr class="section-row"><td colspan="3">User-Level Budget (ULB)</td></tr>
         <tr>
-          <td>Recommended Universal ULB ($/user)<span class="tip" tabindex="0">i<span class="tip-content">The Universal User-Level Budget to configure in enterprise settings. It caps each user's total credit consumption (pool + metered) and is always a hard stop. <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#user-level-budget" target="_blank" rel="noopener">User-level budget ↗</a></span></span></td>
+          <td><a class="label-link" href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#user-level-budget" target="_blank" rel="noopener">Recommended Universal ULB ($/user)</a><span class="tip" tabindex="0">i<span class="tip-content">The Universal User-Level Budget to configure in enterprise settings. It caps each user's total credit consumption (pool + metered) and is always a hard stop. <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#user-level-budget" target="_blank" rel="noopener">User-level budget ↗</a></span></span></td>
           <td class="promo" id="ulbPromo">–</td>
           <td class="postpromo" id="ulbPost">–</td>
         </tr>
         <tr>
-          <td>Available average ULB (credits/user)<span class="tip" tabindex="0">i<span class="tip-content">The per-user credit ceiling implied by the recommended ULB. It is an <em>average</em> based on the recommendation and represents the maximum a user <em>could</em> consume — it does not guarantee every user reaches it. If the enterprise budget ceiling is hit first, users are blocked before reaching this ULB (lowest remaining headroom wins). <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#user-level-budget" target="_blank" rel="noopener">User-level budget ↗</a></span></span></td>
+          <td><a class="label-link" href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#user-level-budget" target="_blank" rel="noopener">Available average ULB (credits/user)</a><span class="tip" tabindex="0">i<span class="tip-content">The per-user credit ceiling implied by the recommended ULB. It is an <em>average</em> based on the recommendation and represents the maximum a user <em>could</em> consume — it does not guarantee every user reaches it. If the enterprise budget ceiling is hit first, users are blocked before reaching this ULB (lowest remaining headroom wins). <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#user-level-budget" target="_blank" rel="noopener">User-level budget ↗</a></span></span></td>
           <td class="promo" id="ulbCrPromo">–</td>
           <td class="postpromo" id="ulbCrPost">–</td>
         </tr>
@@ -523,7 +525,7 @@ footer {
           <td class="postpromo" id="overagePost">–</td>
         </tr>
         <tr>
-          <td>Enterprise budget to set ($)<span class="tip" tabindex="0">i<span class="tip-content">The enterprise budget value to enter in GitHub admin settings — derived from your Total Customer Budget minus license fees, capped at max overage exposure. It only limits metered charges after the pool is exhausted, and is <em>not</em> a total monthly cap. Enable "Stop usage when budget limit is reached" (off by default) to make it a hard stop. <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#enterprise-budget" target="_blank" rel="noopener">Enterprise budget ↗</a></span></span></td>
+          <td><a class="label-link" href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#enterprise-budget" target="_blank" rel="noopener">Enterprise budget to set ($)</a><span class="tip" tabindex="0">i<span class="tip-content">The enterprise budget value to enter in GitHub admin settings — derived from your Total Customer Budget minus license fees, capped at max overage exposure. It only limits metered charges after the pool is exhausted, and is <em>not</em> a total monthly cap. Enable "Stop usage when budget limit is reached" (off by default) to make it a hard stop. <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#enterprise-budget" target="_blank" rel="noopener">Enterprise budget ↗</a></span></span></td>
           <td class="promo" id="entBudgetPromo">–</td>
           <td class="postpromo" id="entBudgetPost">–</td>
         </tr>
