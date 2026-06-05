@@ -68,8 +68,8 @@ Maximum monthly bill  = License fees + Enterprise budget
 
 | Plan | Cost/user/month | Promo credits | Post-promo credits |
 |------|-----------------|---------------|--------------------|
-| Copilot Business | $19 | 3,000 | 1,500 |
-| Copilot Enterprise | $39 | 7,000 | 3,500 |
+| Copilot Business | $19 | 3,000 | 1,900 |
+| Copilot Enterprise | $39 | 7,000 | 3,900 |
 
 Credit price is fixed at **$0.01 per AI credit**. The promo period runs **June 1 through September 1, 2026**.
 
