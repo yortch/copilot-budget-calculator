@@ -340,6 +340,12 @@ details[open] summary {
   color: var(--error-text);
   border-color: var(--error-text);
 }
+.field input[readonly] {
+  background: var(--bg);
+  border-style: dashed;
+  color: var(--text-muted);
+  cursor: default;
+}
 .footer-link { color: var(--accent); font-weight: 600; text-decoration: none; }
 .footer-link:hover { text-decoration: underline; }
 footer {
@@ -367,29 +373,39 @@ footer {
   </header>
 
   <div class="disclaimer">
-    <strong>⚠ Always verify before sharing externally.</strong>
-    Pricing, credit allowances, and feature availability change over time — and promo terms are time-limited and may differ by region or contract. Always confirm every number against the latest official
+    <strong>⚠ Always verify against the latest documentation.</strong>
+    This tool is a sizing aid you can walk through with customers. Pricing, credit allowances, promo terms, and feature availability change over time and may differ by region or contract. Always confirm every number against the latest official
     <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing" target="_blank" rel="noopener">GitHub Copilot billing documentation ↗</a>
-    before committing customer-facing figures. This tool is a sales-engineering aid, not a quote.
+    before relying on it. This tool is a sizing aid, not a quote.
   </div>
 
   <div class="card">
     <h2>Your Inputs</h2>
     <div class="input-grid">
       <div class="field">
-        <label for="businessSeats">Copilot Business seats</label>
+        <label for="businessSeats">Number of Copilot Business seats</label>
         <input type="number" id="businessSeats" min="0" step="1" value="100">
         <span class="hint">Paid Business licenses</span>
       </div>
       <div class="field">
-        <label for="enterpriseSeats">Copilot Enterprise seats</label>
+        <label for="enterpriseSeats">Number of Copilot Enterprise seats</label>
         <input type="number" id="enterpriseSeats" min="0" step="1" value="20">
         <span class="hint">Paid Enterprise licenses</span>
+      </div>
+      <div class="field">
+        <label for="licenseFeesDisplay">Total monthly license fees ($)<span class="tip" tabindex="0">i<span class="tip-content">Calculated automatically from the seat counts and license costs: (Business seats × Business cost) + (Enterprise seats × Enterprise cost). This is the recurring license charge, before any metered overage.</span></span></label>
+        <input type="number" id="licenseFeesDisplay" readonly tabindex="-1" value="0">
+        <span class="hint">Auto-calculated from seats — read only</span>
       </div>
       <div class="field">
         <label for="totalBudget">Total Customer Budget ($/month)<span class="tip" tabindex="0">i<span class="tip-content">The total monthly amount the customer is willing to spend on GitHub Copilot — license fees <em>plus</em> metered overage combined. The enterprise budget is derived as this amount minus license fees. <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing" target="_blank" rel="noopener">Budgets for usage-based billing ↗</a></span></span></label>
         <input type="number" id="totalBudget" min="0" step="100" value="4000">
         <span class="hint">Total monthly ceiling, including license fees</span>
+      </div>
+      <div class="field">
+        <label for="budgetDate">Budget set date<span class="tip" tabindex="0">i<span class="tip-content">The date the budget takes effect. Budgets cannot look back — they govern usage only from the day they are set forward. If set mid-month, the first month is partial. Defaults to the first day of the current month. <a href="https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-for-enterprise/manage-billing-for-enterprise" target="_blank" rel="noopener">Manage enterprise billing ↗</a></span></span></label>
+        <input type="date" id="budgetDate">
+        <span class="hint">Effective from this day; cannot look back</span>
       </div>
       <div class="field">
         <label for="multiplier">ULB strategy<span class="tip" tabindex="0">i<span class="tip-content">The User-Level Budget caps each user's total AI credit consumption and is always a hard stop. The multiplier sets the ULB as a factor of the blended per-license pool share, controlling how much spillover heavier users can absorb. <a href="https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-for-enterprise/manage-billing-for-enterprise/optimize-budget-configuration" target="_blank" rel="noopener">Optimizing budget configuration ↗</a></span></span></label>
@@ -404,7 +420,7 @@ footer {
     </div>
 
     <details>
-      <summary>Plan constants — shown for reference</summary>
+      <summary>Constants — shown for reference</summary>
       <div class="constants-grid">
         <div class="field">
           <label for="bizCost">Business license cost ($/user/month)</label>
@@ -443,8 +459,8 @@ footer {
       <thead>
         <tr>
           <th>Metric</th>
-          <th>Promo Period <span class="col-tag promo-tag">Now</span></th>
-          <th>Post-Promo Period <span class="col-tag postpromo-tag">Later</span></th>
+          <th>Promo Period <span class="col-tag promo-tag">Jun 1 – Sep 1, 2026</span></th>
+          <th>Post-Promo Period <span class="col-tag postpromo-tag">After Sep 1, 2026</span></th>
         </tr>
       </thead>
       <tbody>
@@ -519,6 +535,11 @@ footer {
   </div>
 
   <div class="card">
+    <h2>Budget Effectivity &amp; First-Month Proration<span class="tip" tabindex="0">i<span class="tip-content">Budgets are effective from the day they are set and cannot look back. If a budget starts mid-month, it governs only the remaining days of that first month. The recurring monthly budget to configure stays at the full-month value below.</span></span></h2>
+    <div id="effectivityBody"></div>
+  </div>
+
+  <div class="card">
     <h2>Setup Checklist &amp; Key Rules</h2>
     <ul class="notes-list">
       <li>Enable "AI credit paid usage" policy in enterprise settings — required for any metered usage</li>
@@ -529,13 +550,14 @@ footer {
       <li>Lowest remaining headroom wins — a high ULB does not protect a user if the enterprise budget is exhausted</li>
       <li>Pool is shared across the whole enterprise — not per user, not per license type</li>
       <li>ULB is always a hard stop; there is no "continue past limit" toggle for ULBs</li>
+      <li class="warn">Budgets are effective from the day they are set and <strong>cannot look back</strong> — usage before the set date is not governed; a mid-month start only covers the remaining days of that first month</li>
       <li class="warn">Re-tune both ULB and enterprise budget at the promo→post-promo transition — the same ULB will produce more overage when pool shrinks</li>
     </ul>
   </div>
 
   <footer>
     Based on <a class="footer-link" href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing" target="_blank" rel="noopener">docs.github.com/copilot/concepts/billing/budgets-for-usage-based-billing ↗</a> · Credit price $0.01
-    <div style="margin-top: 8px; font-weight: 600; color: var(--warn-text);">⚠ Always verify pricing, credits, and promo terms against the latest official GitHub documentation before sharing with customers.</div>
+    <div style="margin-top: 8px; font-weight: 600; color: var(--warn-text);">⚠ Always verify pricing, credits, and promo terms against the latest official GitHub documentation.</div>
   </footer>
 
 </div>
@@ -544,6 +566,16 @@ footer {
 const fmt$ = (n) => n === 0 ? '$0' : (n < 0 ? '($' + Math.abs(n).toLocaleString('en-US', {maximumFractionDigits: 0}) + ')' : '$' + n.toLocaleString('en-US', {maximumFractionDigits: 0}));
 const fmt$2 = (n) => '$' + n.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 const fmtN = (n) => n.toLocaleString('en-US', {maximumFractionDigits: 0});
+const fmtPct = (n) => (n * 100).toLocaleString('en-US', {maximumFractionDigits: 0}) + '%';
+
+const PROMO_START = 20260601;
+const PROMO_END = 20260901;
+
+function parseYMD(s) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || '');
+  if (!m) return null;
+  return { y: +m[1], mo: +m[2], d: +m[3] };
+}
 
 function getVal(id) {
   const el = document.getElementById(id);
@@ -609,6 +641,71 @@ function buildAlert(period, r, label) {
   return '<div class="alert alert-success"><strong>' + label + ': ULB and budget are aligned</strong>After license fees, the overage room in your total budget exactly matches the max exposure at this ULB level.</div>';
 }
 
+function computeEffective() {
+  const ymd = parseYMD(document.getElementById('budgetDate').value);
+  if (!ymd) return null;
+  const promo = computePeriod('promo');
+  const post = computePeriod('post');
+  const key = ymd.y * 10000 + ymd.mo * 100 + ymd.d;
+  let periodKind, active, periodLabel;
+  if (key < PROMO_START) { periodKind = 'pre'; active = promo; periodLabel = 'Before promo period'; }
+  else if (key < PROMO_END) { periodKind = 'promo'; active = promo; periodLabel = 'Promo period'; }
+  else { periodKind = 'post'; active = post; periodLabel = 'Post-promo period'; }
+
+  const daysInMonth = new Date(ymd.y, ymd.mo, 0).getDate();
+  const daysRemaining = periodKind === 'pre' ? daysInMonth : (daysInMonth - ymd.d + 1);
+  const factor = daysInMonth > 0 ? daysRemaining / daysInMonth : 1;
+
+  return {
+    ymd, periodKind, periodLabel, active, daysInMonth, daysRemaining, factor,
+    proratedOverage: active.maxOverage * factor,
+    proratedEntBudget: active.entBudget * factor
+  };
+}
+
+function renderEffectivity() {
+  const body = document.getElementById('effectivityBody');
+  const eff = computeEffective();
+  if (!eff) {
+    body.innerHTML = '<p class="hint">Enter a valid budget set date to see effectivity.</p>';
+    return;
+  }
+  if (eff.active.totalSeats === 0) {
+    body.innerHTML = '<p class="hint">Enter seat counts to see effectivity figures.</p>';
+    return;
+  }
+  const dateStr = new Date(eff.ymd.y, eff.ymd.mo - 1, eff.ymd.d)
+    .toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  let note, noteClass;
+  if (eff.periodKind === 'pre') {
+    note = 'This date is <strong>before the promo period</strong>, which starts June 1, 2026. Promo allowances apply from June 1, 2026 — the figures below use promo values.';
+    noteClass = 'alert-warn';
+  } else if (eff.periodKind === 'promo') {
+    note = 'As of this date you are in the <strong>promo period</strong> (June 1 – Sept 1, 2026). The promo recommendation applies through Aug 31, 2026; <strong>post-promo begins Sept 1, 2026</strong> — plan to re-tune then.';
+    noteClass = 'alert-success';
+  } else {
+    note = 'As of this date you are in the <strong>post-promo period</strong> (after Sept 1, 2026). Figures below use post-promo values.';
+    noteClass = 'alert-success';
+  }
+
+  const partialRows = eff.factor < 1
+    ? '<tr><td>First month is partial (remaining days)</td><td class="promo">' + eff.daysRemaining + ' of ' + eff.daysInMonth + ' days (' + fmtPct(eff.factor) + ')</td></tr>' +
+      '<tr><td>First-month max overage exposure (estimate, remaining days)</td><td class="promo">' + fmt$(eff.proratedOverage) + '</td></tr>' +
+      '<tr><td>First-month effective budget (estimate, remaining days)<span class="tip" tabindex="0">i<span class="tip-content">An estimate of overage spend governed during the partial first month only. The recurring budget you configure in GitHub stays at the full-month value above — GitHub budgets are monthly caps and do not auto-prorate.</span></span></td><td class="promo">' + fmt$(eff.proratedEntBudget) + '</td></tr>'
+    : '<tr><td>First month is full</td><td class="promo">' + eff.daysInMonth + ' of ' + eff.daysInMonth + ' days (100%)</td></tr>';
+
+  body.innerHTML =
+    '<p class="hint" style="margin-top:0;">Budget set date: <strong>' + dateStr + '</strong> — ' + eff.periodLabel + '</p>' +
+    '<table class="results-table"><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody>' +
+    '<tr class="highlight"><td>Recurring monthly enterprise budget to configure</td><td class="promo">' + fmt$(eff.active.entBudget) + '</td></tr>' +
+    '<tr><td>Recommended Universal ULB ($/user, monthly)</td><td class="promo">' + fmt$2(eff.active.ulb) + '</td></tr>' +
+    partialRows +
+    '</tbody></table>' +
+    '<div class="alert ' + noteClass + '"><strong>Effective from ' + dateStr + '</strong>' + note + '</div>' +
+    '<div class="alert alert-warn"><strong>Budgets cannot look back</strong>The budget governs usage only from ' + dateStr + ' forward. Any usage earlier in the month is not covered. The recurring monthly budget to set in GitHub admin is the full-month value (' + fmt$(eff.active.entBudget) + '); the partial-month figures above are estimates for the first month only.</div>';
+}
+
 function render() {
   const promo = computePeriod('promo');
   const post = computePeriod('post');
@@ -642,14 +739,25 @@ function render() {
   document.getElementById('alertStrategy').innerHTML = buildStrategyAlert();
   document.getElementById('alertPromo').innerHTML = buildAlert('promo', promo, 'Promo period');
   document.getElementById('alertPost').innerHTML = buildAlert('post', post, 'Post-promo period');
+
+  document.getElementById('licenseFeesDisplay').value = Math.round(promo.licenseFees);
+  renderEffectivity();
 }
 
-const inputs = ['businessSeats', 'enterpriseSeats', 'totalBudget', 'multiplier',
+const inputs = ['businessSeats', 'enterpriseSeats', 'totalBudget', 'budgetDate', 'multiplier',
                 'bizCost', 'entCost', 'bizPromo', 'entPromo', 'bizPost', 'entPost'];
 inputs.forEach(id => {
   document.getElementById(id).addEventListener('input', render);
   document.getElementById(id).addEventListener('change', render);
 });
+
+(function initBudgetDate() {
+  const el = document.getElementById('budgetDate');
+  if (!el.value) {
+    const now = new Date();
+    el.value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-01';
+  }
+})();
 
 render();
 </script>

@@ -12,11 +12,12 @@ Tools and references for sizing GitHub Copilot Business and Enterprise budgets u
 ## Quick Start
 
 1. Open `copilot-budget-calculator.html` in any modern browser.
-2. Enter the customer's Business and Enterprise seat counts.
+2. Enter the customer's Business and Enterprise seat counts. Total monthly license fees are calculated automatically.
 3. Enter the customer's **Total Customer Budget** — the total dollar amount they're willing to spend per month, including license fees.
-4. Pick a ULB strategy (Conservative / Balanced / Moderate / Aggressive).
-5. Compare the **Promo Period** and **Post-Promo Period** columns to see how their costs will shift when the promo ends.
-6. Use the recommended Universal ULB and Enterprise Budget values when configuring GitHub admin settings.
+4. Set the **Budget set date** (defaults to the first of the current month). Budgets are effective from the day they're set and cannot look back, so a mid-month start only covers the remaining days of that first month.
+5. Pick a ULB strategy (Conservative / Balanced / Moderate / Aggressive).
+6. Compare the **Promo Period** (Jun 1 – Sep 1, 2026) and **Post-Promo Period** columns to see how their costs will shift when the promo ends.
+7. Use the recommended Universal ULB and Enterprise Budget values when configuring GitHub admin settings.
 
 For deeper sensitivity analysis or to model excluded cost centers for power users, use the Excel worksheet.
 
@@ -63,16 +64,16 @@ Enterprise budget     = min(max(0, Total Customer Budget − License fees), Max 
 Maximum monthly bill  = License fees + Enterprise budget
 ```
 
-## Plan Constants
+## Constants
 
 | Plan | Cost/user/month | Promo credits | Post-promo credits |
 |------|-----------------|---------------|--------------------|
 | Copilot Business | $19 | 3,000 | 1,500 |
 | Copilot Enterprise | $39 | 7,000 | 3,500 |
 
-Credit price is fixed at **$0.01 per AI credit**.
+Credit price is fixed at **$0.01 per AI credit**. The promo period runs **June 1 through September 1, 2026**.
 
-> **Note:** Plan constants and post-promo allowances are shown for reference. Confirm the current GitHub-published values against the latest [GitHub Copilot documentation](https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing) before quoting customers externally.
+> **Note:** These constants and post-promo allowances are shown for reference. Confirm the current GitHub-published values against the latest [GitHub Copilot documentation](https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing).
 
 ## Power Users — The Excluded Cost Center Pattern
 
@@ -105,6 +106,7 @@ After exclusion, the user is governed only by their cost center budget. The ente
 - **Cost center exclusion is the only way** to give a team or user spending authority beyond the enterprise cap.
 - **A $0 budget at any level blocks usage immediately** for the users it applies to.
 - **The enterprise budget is not a total monthly cap** — it only caps metered overage. Max bill = license fees + enterprise budget.
+- **Budgets cannot look back** — they are effective from the day they are set. A mid-month start only governs the remaining days of that first month; earlier usage is not covered.
 
 ## References
 
@@ -114,4 +116,4 @@ After exclusion, the user is governed only by their cost center budget. The ente
 
 ## Disclaimer
 
-These tools are provided as sales engineering aids. Pricing, credit allowances, and feature availability change over time — always verify current values against official GitHub documentation before committing customer-facing numbers. Promo terms in particular are time-limited and may differ by region or contract.
+These tools are provided as sizing aids you can walk through with customers. Pricing, credit allowances, and feature availability change over time — always verify current values against official GitHub documentation before relying on them. Promo terms in particular are time-limited and may differ by region or contract.
