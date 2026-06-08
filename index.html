@@ -328,7 +328,7 @@ details[open] summary {
   bottom: 150%;
   inset-inline-start: 50%;
   transform: translateX(-50%);
-  width: 250px;
+  width: 300px;
   background: var(--card-bg);
   color: var(--text);
   border: 1px solid var(--border);
@@ -409,14 +409,13 @@ footer {
   </div>
 
   <div class="card">
-    <h2>Your Inputs<span class="tip" tabindex="0">i<span class="tip-content" style="min-width:340px"><strong>How to use this calculator</strong><ol style="margin:8px 0 0 0;padding-left:18px;line-height:1.6">
-<li>Enter the customer's <strong>Number of Copilot Business seats</strong> and <strong>Number of Copilot Enterprise seats</strong>. Total Monthly License Fees are calculated automatically.</li>
-<li>Enter the customer's <strong>Total Customer Budget</strong> — the total dollar amount they are willing to spend per month, including license fees.</li>
-<li>Set the <strong>Budget set date</strong> (defaults to the first day of the current month). Budgets are effective from the day they are set and cannot look back, so a mid-month start only covers the remaining days of that first month.</li>
-<li>Pick a <strong>ULB strategy</strong> (Limited / Conservative / Balanced / Moderate / Aggressive). Balanced (2.0×) is the default starting point.</li>
-<li>Compare the <strong>Promo Period</strong> (Jun 1 – Sep 1, 2026) and <strong>Post-Promo Period</strong> (after Sep 1, 2026) columns to see how costs shift when the promo ends.</li>
-<li>If the budget set date is not the first of the month, the <strong>Prorated configuration</strong> section appears with a date-sensitive first-month enterprise budget.</li>
-<li>Use the recommended <strong>Universal ULB</strong> and <strong>Enterprise budget</strong> values as guidance for configuring GitHub Enterprise admin settings.</li>
+    <h2>Your Inputs<span class="tip" tabindex="0">i<span class="tip-content" style="width:420px"><strong>How to use this calculator</strong><ol style="margin:8px 0 0 0;padding-left:18px;line-height:1.55">
+<li><strong>Seats</strong> — enter Business and Enterprise seat counts; license fees calculate automatically.</li>
+<li><strong>Total Customer Budget</strong> — total monthly ceiling including license fees and overage.</li>
+<li><strong>Budget set date</strong> — defaults to the 1st of the current month; mid-month dates trigger prorated recommendations.</li>
+<li><strong>ULB strategy</strong> — Balanced (2.0×) is the recommended default.</li>
+<li>Compare <strong>Promo</strong> (Jun 1 – Sep 1, 2026) vs <strong>Post-Promo</strong> columns — plan to re-tune when promo ends.</li>
+<li>Use the <strong>Universal ULB</strong> and <strong>Enterprise budget</strong> values as guidance for GitHub Enterprise admin settings.</li>
 </ol></span></span></h2>
     <div class="input-grid">
       <div class="field">
