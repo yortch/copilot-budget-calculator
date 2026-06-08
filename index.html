@@ -589,6 +589,11 @@ footer {
           <td class="promo" id="perUserBillPromo">–</td>
           <td class="postpromo" id="perUserBillPost">–</td>
         </tr>
+        <tr id="discountedPerUserBillRow" style="display:none">
+          <td>Effective per-user max bill after discount ($)</td>
+          <td class="promo" id="discountedPerUserBillPromo">–</td>
+          <td class="postpromo" id="discountedPerUserBillPost">–</td>
+        </tr>
       </tbody>
     </table>
 
@@ -845,12 +850,17 @@ function render() {
 
   const discount = getVal('discountPct') / 100;
   const discountRow = document.getElementById('discountedBillRow');
+  const discountPerUserRow = document.getElementById('discountedPerUserBillRow');
   if (discount > 0) {
     document.getElementById('discountedBillPromo').textContent = fmt$(promo.maxBill * (1 - discount));
     document.getElementById('discountedBillPost').textContent = fmt$(post.maxBill * (1 - discount));
+    document.getElementById('discountedPerUserBillPromo').textContent = fmt$2(promo.perUserBill * (1 - discount));
+    document.getElementById('discountedPerUserBillPost').textContent = fmt$2(post.perUserBill * (1 - discount));
     discountRow.style.display = '';
+    discountPerUserRow.style.display = '';
   } else {
     discountRow.style.display = 'none';
+    discountPerUserRow.style.display = 'none';
   }
 
   document.getElementById('alertStrategy').innerHTML = buildStrategyAlert();
