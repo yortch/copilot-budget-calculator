@@ -450,9 +450,14 @@ footer {
           <option value="1.5">Conservative — 1.5× per-license share</option>
           <option value="2.0" selected>Balanced — 2.0× per-license share</option>
           <option value="2.5">Moderate — 2.5× per-license share</option>
-          <option value="3.0">Aggressive — 3.0× per-license share</option>
+          <option value="3.0">High — 3.0× per-license share</option>
         </select>
         <span class="hint">How much spillover power users can absorb</span>
+      </div>
+      <div class="field">
+        <label for="discountPct">License discount (%)<span class="tip" tabindex="0">i<span class="tip-content">Optional discount applied to Business and Enterprise license list prices. A 10% discount on a $19 Business seat gives an effective cost of $17.10/seat, reducing license fees and leaving more room for overage within the Total Customer Budget.</span></span></label>
+        <input type="number" id="discountPct" min="0" max="100" step="1" value="0">
+        <span class="hint">Applied to list price — enter 0 if no discount</span>
       </div>
     </div>
 
@@ -508,7 +513,7 @@ footer {
           <td class="postpromo" id="poolCreditsPost">–</td>
         </tr>
         <tr>
-          <td>Blended per-license share ($)</td>
+          <td>Blended pool value ($/license)</td>
           <td class="promo" id="perLicSharePromo">–</td>
           <td class="postpromo" id="perLicSharePost">–</td>
         </tr>
@@ -639,6 +644,9 @@ function computePeriod(period) {
   const multiplier = getVal('multiplier');
   const bizCost = getVal('bizCost');
   const entCost = getVal('entCost');
+  const discount = getVal('discountPct') / 100;
+  const effectiveBizCost = bizCost * (1 - discount);
+  const effectiveEntCost = entCost * (1 - discount);
 
   const bizCredits = period === 'promo' ? getVal('bizPromo') : getVal('bizPost');
   const entCredits = period === 'promo' ? getVal('entPromo') : getVal('entPost');
@@ -646,7 +654,7 @@ function computePeriod(period) {
   const totalSeats = bizSeats + entSeats;
   const poolCredits = bizSeats * bizCredits + entSeats * entCredits;
   const poolDollars = poolCredits * 0.01;
-  const licenseFees = bizSeats * bizCost + entSeats * entCost;
+  const licenseFees = bizSeats * effectiveBizCost + entSeats * effectiveEntCost;
   const perLicShare = totalSeats > 0 ? poolDollars / totalSeats : 0;
   const ulb = perLicShare * multiplier;
   const ulbCredits = ulb / 0.01;
@@ -842,7 +850,7 @@ function render() {
 }
 
 const inputs = ['businessSeats', 'enterpriseSeats', 'totalBudget', 'budgetDate', 'multiplier',
-                'bizCost', 'entCost', 'bizPromo', 'entPromo', 'bizPost', 'entPost'];
+                'bizCost', 'entCost', 'bizPromo', 'entPromo', 'bizPost', 'entPost', 'discountPct'];
 inputs.forEach(id => {
   document.getElementById(id).addEventListener('input', render);
   document.getElementById(id).addEventListener('change', render);
