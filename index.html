@@ -668,7 +668,7 @@ function computePeriod(period) {
   const maxColl = ulb * totalSeats;
   const maxOverage = Math.max(0, maxColl - poolDollars);
   const availableForOverage = totalBudget - licenseFees;
-  const entBudget = Math.min(Math.max(0, availableForOverage), maxOverage);
+  const entBudget = Math.max(0, availableForOverage);
   const maxBill = licenseFees + entBudget;
   const perUserBill = totalSeats > 0 ? maxBill / totalSeats : 0;
 

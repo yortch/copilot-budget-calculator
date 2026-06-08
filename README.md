@@ -63,7 +63,7 @@ Max collective spend  = Universal ULB × total seats
 
 Max overage exposure  = max(0, Max collective − Pool)
 
-Enterprise budget     = min(max(0, Total Customer Budget − License fees), Max overage exposure)
+Enterprise budget     = max(0, Total Customer Budget − License fees)
 
 Maximum monthly bill  = License fees + Enterprise budget
 
