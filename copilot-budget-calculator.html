@@ -194,6 +194,10 @@ details[open] summary {
   font-weight: 600;
   color: var(--text);
 }
+.results-table tbody tr:not(.section-row) td:first-child {
+  background: var(--header-bg);
+  color: var(--header-text);
+}
 .results-table thead th {
   background: var(--header-bg);
   color: var(--header-text);
@@ -413,7 +417,7 @@ footer {
       </div>
       <div class="field">
         <label for="enterpriseSeats">Number of Copilot Enterprise seats</label>
-        <input type="text" inputmode="numeric" id="enterpriseSeats" value="20">
+        <input type="text" inputmode="numeric" id="enterpriseSeats" value="0">
         <span class="hint">Paid Enterprise licenses</span>
       </div>
       <div class="field">
@@ -423,7 +427,7 @@ footer {
       </div>
       <div class="field">
         <label for="totalBudget">Total Customer <a class="label-link" href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing" target="_blank" rel="noopener">Budget</a> ($/month)<span class="tip" tabindex="0">i<span class="tip-content">The total monthly amount the customer is willing to spend on GitHub Copilot — license fees <em>plus</em> metered overage combined. The enterprise budget is derived as this amount minus license fees. <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing" target="_blank" rel="noopener">Budgets for usage-based billing ↗</a></span></span></label>
-        <div class="dollar-wrap"><input type="text" inputmode="numeric" id="totalBudget" value="6,000"></div>
+        <div class="dollar-wrap"><input type="text" inputmode="numeric" id="totalBudget" value="60,000"></div>
         <span class="hint">Total monthly ceiling, including license fees</span>
       </div>
       <div class="field">
