@@ -529,22 +529,26 @@ footer {
           <td class="promo" id="entBudgetPromo">–</td>
           <td class="postpromo" id="entBudgetPost">–</td>
         </tr>
-        <tr class="section-row"><td colspan="3">Budget Set Date Effect (As configured)</td></tr>
-        <tr>
+        <tr class="section-row" id="prorationSectionRow"><td colspan="3">Prorated configuration based on budget set date</td></tr>
+        <tr id="asOfPeriodRow">
           <td>As-of period (from Budget set date)</td>
-          <td colspan="2" id="asOfPeriod">–</td>
+          <td class="promo" id="asOfPeriodPromo">–</td>
+          <td class="postpromo" id="asOfPeriodPost">–</td>
         </tr>
-        <tr>
+        <tr id="asOfCoverageRow">
           <td>First month coverage</td>
-          <td colspan="2" id="asOfCoverage">–</td>
+          <td class="promo" id="asOfCoveragePromo">–</td>
+          <td class="postpromo" id="asOfCoveragePost">–</td>
         </tr>
-        <tr class="highlight">
+        <tr class="highlight" id="asOfEntBudgetRow">
           <td><a class="label-link" href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#enterprise-budget" target="_blank" rel="noopener">Enterprise budget</a> to set now ($, first-month estimate)<span class="tip" tabindex="0">i<span class="tip-content">Date-sensitive first-month estimate based on remaining days in the month. This helps planning what portion of the monthly cap is likely usable in month one. GitHub still stores the configured budget as a monthly cap. <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#enterprise-budget" target="_blank" rel="noopener">Enterprise budget ↗</a></span></span></td>
-          <td colspan="2" id="asOfEntBudget">–</td>
+          <td class="promo" id="asOfEntBudgetPromo">–</td>
+          <td class="postpromo" id="asOfEntBudgetPost">–</td>
         </tr>
-        <tr>
+        <tr id="asOfRecurringEntBudgetRow">
           <td>Recurring monthly <a class="label-link" href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#enterprise-budget" target="_blank" rel="noopener">enterprise budget</a> to configure</td>
-          <td colspan="2" id="asOfRecurringEntBudget">–</td>
+          <td class="promo" id="asOfRecurringEntBudgetPromo">–</td>
+          <td class="postpromo" id="asOfRecurringEntBudgetPost">–</td>
         </tr>
 
         <tr class="section-row"><td colspan="3">Bill Ceiling</td></tr>
@@ -696,25 +700,45 @@ function computeEffective() {
 }
 
 function renderEffectivity() {
-  const periodEl = document.getElementById('asOfPeriod');
-  const coverageEl = document.getElementById('asOfCoverage');
-  const estEl = document.getElementById('asOfEntBudget');
-  const recurringEl = document.getElementById('asOfRecurringEntBudget');
+  const periodPromoEl = document.getElementById('asOfPeriodPromo');
+  const periodPostEl = document.getElementById('asOfPeriodPost');
+  const coveragePromoEl = document.getElementById('asOfCoveragePromo');
+  const coveragePostEl = document.getElementById('asOfCoveragePost');
+  const estPromoEl = document.getElementById('asOfEntBudgetPromo');
+  const estPostEl = document.getElementById('asOfEntBudgetPost');
+  const recurringPromoEl = document.getElementById('asOfRecurringEntBudgetPromo');
+  const recurringPostEl = document.getElementById('asOfRecurringEntBudgetPost');
   const noteEl = document.getElementById('effectivityNote');
+  const prorationRows = [
+    document.getElementById('prorationSectionRow'),
+    document.getElementById('asOfPeriodRow'),
+    document.getElementById('asOfCoverageRow'),
+    document.getElementById('asOfEntBudgetRow'),
+    document.getElementById('asOfRecurringEntBudgetRow')
+  ];
+  const setProrationVisible = (show) => {
+    prorationRows.forEach((row) => { row.style.display = show ? '' : 'none'; });
+  };
+  const setAsOfValues = (promoEl, postEl, value, target) => {
+    promoEl.textContent = target === 'promo' ? value : '–';
+    postEl.textContent = target === 'post' ? value : '–';
+  };
   const eff = computeEffective();
   if (!eff) {
-    periodEl.textContent = 'Enter a valid budget set date';
-    coverageEl.textContent = '–';
-    estEl.textContent = '–';
-    recurringEl.textContent = '–';
+    setProrationVisible(false);
+    setAsOfValues(periodPromoEl, periodPostEl, 'Enter a valid budget set date', 'promo');
+    setAsOfValues(coveragePromoEl, coveragePostEl, '–', 'promo');
+    setAsOfValues(estPromoEl, estPostEl, '–', 'promo');
+    setAsOfValues(recurringPromoEl, recurringPostEl, '–', 'promo');
     noteEl.innerHTML = '';
     return;
   }
   if (eff.active.totalSeats === 0) {
-    periodEl.textContent = 'Enter seat counts';
-    coverageEl.textContent = '–';
-    estEl.textContent = '–';
-    recurringEl.textContent = '–';
+    setProrationVisible(false);
+    setAsOfValues(periodPromoEl, periodPostEl, 'Enter seat counts', 'promo');
+    setAsOfValues(coveragePromoEl, coveragePostEl, '–', 'promo');
+    setAsOfValues(estPromoEl, estPostEl, '–', 'promo');
+    setAsOfValues(recurringPromoEl, recurringPostEl, '–', 'promo');
     noteEl.innerHTML = '';
     return;
   }
@@ -739,17 +763,24 @@ function renderEffectivity() {
     ? eff.daysRemaining + ' of ' + eff.daysInMonth + ' days (' + fmtPct(eff.factor) + ')'
     : eff.daysInMonth + ' of ' + eff.daysInMonth + ' days (100%)';
   const periodStr = dateStr + ' — ' + eff.periodLabel;
+  const targetCol = eff.periodKind === 'post' ? 'post' : 'promo';
+  const showProration = eff.ymd.d !== 1;
 
-  periodEl.textContent = periodStr;
-  coverageEl.textContent = coverageStr;
-  estEl.textContent = firstMonthBudgetStr;
-  recurringEl.textContent = recurringBudgetStr;
+  setProrationVisible(showProration);
+  setAsOfValues(periodPromoEl, periodPostEl, periodStr, targetCol);
+  setAsOfValues(coveragePromoEl, coveragePostEl, coverageStr, targetCol);
+  setAsOfValues(estPromoEl, estPostEl, firstMonthBudgetStr, targetCol);
+  setAsOfValues(recurringPromoEl, recurringPostEl, recurringBudgetStr, targetCol);
 
   noteEl.innerHTML =
     '<div class="alert ' + noteClass + '"><strong>Effective from ' + dateStr + '</strong>' + note + '</div>' +
     (eff.active.availableForOverage < 0
       ? '<div class="alert alert-error"><strong>No enterprise budget to set</strong>The Total Customer Budget does not cover the monthly license fees, so there is nothing left for overage. Do <b>not</b> set the enterprise budget to $0 — a $0 budget blocks all metered usage immediately. Raise the Total Customer Budget above the license fees first.</div>'
-      : '<div class="alert alert-warn"><strong>Budgets cannot look back</strong>The budget governs usage only from ' + dateStr + ' forward. Any usage earlier in the month is not covered. The first-month estimate above reflects remaining days; the recurring monthly budget to configure is ' + recurringBudgetStr + '.</div>');
+      : '<div class="alert alert-warn"><strong>Budgets cannot look back</strong>The budget governs usage only from ' + dateStr + ' forward. Any usage earlier in the month is not covered.' +
+        (showProration
+          ? ' The first-month estimate above reflects remaining days; the recurring monthly budget to configure is ' + recurringBudgetStr + '.'
+          : ' Because this date is the first day of the month, proration is not needed.') +
+        '</div>');
 }
 
 function render() {
