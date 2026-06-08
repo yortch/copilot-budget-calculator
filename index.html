@@ -455,7 +455,7 @@ footer {
         <span class="hint">How much spillover power users can absorb</span>
       </div>
       <div class="field">
-        <label for="discountPct">License discount (%)<span class="tip" tabindex="0">i<span class="tip-content">Optional discount applied to Business and Enterprise license list prices. A 10% discount on a $19 Business seat gives an effective cost of $17.10/seat, reducing license fees and leaving more room for overage within the Total Customer Budget.</span></span></label>
+        <label for="discountPct">Optional discount based on enterprise agreement (%)<span class="tip" tabindex="0">i<span class="tip-content">If the customer has a negotiated discount on Copilot licenses, enter the percentage here. This is applied to the Maximum monthly bill as a separate display row to show the discounted ceiling — it does not change the underlying budget calculations.</span></span></label>
         <input type="number" id="discountPct" min="0" max="100" step="1" value="0">
         <span class="hint">Applied to list price — enter 0 if no discount</span>
       </div>
@@ -579,6 +579,11 @@ footer {
           <td class="promo" id="maxBillPromo">–</td>
           <td class="postpromo" id="maxBillPost">–</td>
         </tr>
+        <tr id="discountedBillRow" style="display:none">
+          <td>Maximum monthly bill after discount ($)<span class="tip" tabindex="0">i<span class="tip-content">The maximum monthly bill after applying the negotiated enterprise agreement discount. This is informational only — the enterprise budget and ULB recommendations above are based on list prices.</span></span></td>
+          <td class="promo" id="discountedBillPromo">–</td>
+          <td class="postpromo" id="discountedBillPost">–</td>
+        </tr>
         <tr>
           <td>Effective per-user max bill ($)</td>
           <td class="promo" id="perUserBillPromo">–</td>
@@ -644,9 +649,6 @@ function computePeriod(period) {
   const multiplier = getVal('multiplier');
   const bizCost = getVal('bizCost');
   const entCost = getVal('entCost');
-  const discount = getVal('discountPct') / 100;
-  const effectiveBizCost = bizCost * (1 - discount);
-  const effectiveEntCost = entCost * (1 - discount);
 
   const bizCredits = period === 'promo' ? getVal('bizPromo') : getVal('bizPost');
   const entCredits = period === 'promo' ? getVal('entPromo') : getVal('entPost');
@@ -654,7 +656,7 @@ function computePeriod(period) {
   const totalSeats = bizSeats + entSeats;
   const poolCredits = bizSeats * bizCredits + entSeats * entCredits;
   const poolDollars = poolCredits * 0.01;
-  const licenseFees = bizSeats * effectiveBizCost + entSeats * effectiveEntCost;
+  const licenseFees = bizSeats * bizCost + entSeats * entCost;
   const perLicShare = totalSeats > 0 ? poolDollars / totalSeats : 0;
   const ulb = perLicShare * multiplier;
   const ulbCredits = ulb / 0.01;
@@ -840,6 +842,16 @@ function render() {
   document.getElementById('maxBillPost').textContent = fmt$(post.maxBill);
   document.getElementById('perUserBillPromo').textContent = fmt$2(promo.perUserBill);
   document.getElementById('perUserBillPost').textContent = fmt$2(post.perUserBill);
+
+  const discount = getVal('discountPct') / 100;
+  const discountRow = document.getElementById('discountedBillRow');
+  if (discount > 0) {
+    document.getElementById('discountedBillPromo').textContent = fmt$(promo.maxBill * (1 - discount));
+    document.getElementById('discountedBillPost').textContent = fmt$(post.maxBill * (1 - discount));
+    discountRow.style.display = '';
+  } else {
+    discountRow.style.display = 'none';
+  }
 
   document.getElementById('alertStrategy').innerHTML = buildStrategyAlert();
   document.getElementById('alertPromo').innerHTML = buildAlert('promo', promo, 'Promo period');
