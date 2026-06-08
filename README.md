@@ -8,7 +8,7 @@ Interactive single-page calculator for sizing GitHub Copilot Business and Enterp
 2. Enter the customer's **Number of Copilot Business seats** and **Number of Copilot Enterprise seats**. **Total Monthly License Fees** are calculated automatically.
 3. Enter the customer's **Total Customer Budget** — the total dollar amount they are willing to spend per month, including license fees.
 4. Set the **Budget set date** (defaults to the first day of the current month). Budgets are effective from the day they are set and [cannot look back](https://docs.github.com/en/billing/concepts/budgets-and-alerts#your-first-billing-cycle-after-creating-a-budget), so a mid-month start only covers the remaining days of that first month.
-5. Pick a **ULB strategy** (Limited / Conservative / Balanced / Moderate / Aggressive). **Balanced (2.0×)** is the default starting point.
+5. Pick a **ULB strategy** (Limited / Conservative / Balanced / Moderate / Aggressive). **Balanced (2.0×)** is the default and recommended starting point.
 6. Compare the **Promo Period** (Jun 1 – Sep 1, 2026) and **Post-Promo Period** (after Sep 1, 2026) columns to see how costs shift when the promo ends.
 7. If the budget set date is not the first of the month, the **Prorated configuration** section appears with a date-sensitive first-month enterprise budget.
 8. Use the recommended **Universal ULB** and **Enterprise budget** values when configuring GitHub Enterprise admin settings.
@@ -78,7 +78,7 @@ Prorated ent. budget  = Enterprise budget × (days remaining in month / days in 
 | Conservative | 1.5× | Modest headroom above the pool share |
 | **Balanced** | **2.0×** | **Default — good starting point for most teams** |
 | Moderate | 2.5× | More headroom; enterprise budget governs total spend |
-| Aggressive | 3.0× | Maximum headroom; enterprise budget is the primary governor |
+| High | 3.0× | Maximum headroom; enterprise budget is the primary governor |
 
 ## Constants
 
