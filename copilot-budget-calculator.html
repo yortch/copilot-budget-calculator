@@ -214,6 +214,11 @@ details[open] summary {
   color: var(--text-muted);
   padding: 8px 14px;
 }
+#prorationSectionRow td {
+  text-transform: none;
+  font-size: 13px;
+  letter-spacing: 0;
+}
 .results-table td.promo {
   background: var(--promo-bg);
   font-variant-numeric: tabular-nums;
@@ -541,7 +546,7 @@ footer {
           <td class="postpromo" id="asOfCoveragePost">–</td>
         </tr>
         <tr class="highlight" id="asOfEntBudgetRow">
-          <td><a class="label-link" href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#enterprise-budget" target="_blank" rel="noopener">Enterprise budget</a> to set on <span id="asOfDateLabel">selected date</span> ($, first-month estimate)<span class="tip" tabindex="0">i<span class="tip-content">Date-sensitive first-month estimate based on remaining days in the month. This helps planning what portion of the monthly cap is likely usable in month one. GitHub still stores the configured budget as a monthly cap. <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#enterprise-budget" target="_blank" rel="noopener">Enterprise budget ↗</a></span></span></td>
+          <td><a class="label-link" href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#enterprise-budget" target="_blank" rel="noopener">Enterprise budget</a> to set on <span id="asOfDateLabel">selected date</span> ($)<span class="tip" tabindex="0">i<span class="tip-content">Date-sensitive first-month estimate based on remaining days in the month. This helps planning what portion of the monthly cap is likely usable in month one. GitHub still stores the configured budget as a monthly cap. <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#enterprise-budget" target="_blank" rel="noopener">Enterprise budget ↗</a></span></span></td>
           <td class="promo" id="asOfEntBudgetPromo">–</td>
           <td class="postpromo" id="asOfEntBudgetPost">–</td>
         </tr>
@@ -746,8 +751,9 @@ function renderEffectivity() {
     .toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   const prorationDateEl = document.getElementById('prorationDateLabel');
   if (prorationDateEl) prorationDateEl.textContent = '(' + dateStr + ')';
+  const dateStrNoYear = new Date(eff.ymd.y, eff.ymd.mo - 1, eff.ymd.d).toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
   const asOfDateEl = document.getElementById('asOfDateLabel');
-  if (asOfDateEl) asOfDateEl.textContent = dateStr;
+  if (asOfDateEl) asOfDateEl.textContent = dateStrNoYear;
 
   let note, noteClass;
   if (eff.periodKind === 'pre') {
