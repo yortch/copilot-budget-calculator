@@ -525,9 +525,26 @@ footer {
           <td class="postpromo" id="overagePost">–</td>
         </tr>
         <tr>
-          <td><a class="label-link" href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#enterprise-budget" target="_blank" rel="noopener">Enterprise budget</a> to set ($)<span class="tip" tabindex="0">i<span class="tip-content">The enterprise budget value to enter in GitHub admin settings — derived from your Total Customer Budget minus license fees, capped at max overage exposure. It only limits metered charges after the pool is exhausted, and is <em>not</em> a total monthly cap. Enable "Stop usage when budget limit is reached" (off by default) to make it a hard stop. <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#enterprise-budget" target="_blank" rel="noopener">Enterprise budget ↗</a></span></span></td>
+          <td><a class="label-link" href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#enterprise-budget" target="_blank" rel="noopener">Enterprise budget</a> to set ($, full-month reference)<span class="tip" tabindex="0">i<span class="tip-content">The full-month enterprise budget reference by period. The date-sensitive first-month value appears in the Budget Set Date Effect rows below. <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#enterprise-budget" target="_blank" rel="noopener">Enterprise budget ↗</a></span></span></td>
           <td class="promo" id="entBudgetPromo">–</td>
           <td class="postpromo" id="entBudgetPost">–</td>
+        </tr>
+        <tr class="section-row"><td colspan="3">Budget Set Date Effect (As configured)</td></tr>
+        <tr>
+          <td>As-of period (from Budget set date)</td>
+          <td colspan="2" id="asOfPeriod">–</td>
+        </tr>
+        <tr>
+          <td>First month coverage</td>
+          <td colspan="2" id="asOfCoverage">–</td>
+        </tr>
+        <tr class="highlight">
+          <td><a class="label-link" href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#enterprise-budget" target="_blank" rel="noopener">Enterprise budget</a> to set now ($, first-month estimate)<span class="tip" tabindex="0">i<span class="tip-content">Date-sensitive first-month estimate based on remaining days in the month. This helps planning what portion of the monthly cap is likely usable in month one. GitHub still stores the configured budget as a monthly cap. <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#enterprise-budget" target="_blank" rel="noopener">Enterprise budget ↗</a></span></span></td>
+          <td colspan="2" id="asOfEntBudget">–</td>
+        </tr>
+        <tr>
+          <td>Recurring monthly <a class="label-link" href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#enterprise-budget" target="_blank" rel="noopener">enterprise budget</a> to configure</td>
+          <td colspan="2" id="asOfRecurringEntBudget">–</td>
         </tr>
 
         <tr class="section-row"><td colspan="3">Bill Ceiling</td></tr>
@@ -547,11 +564,7 @@ footer {
     <div id="alertStrategy"></div>
     <div id="alertPromo"></div>
     <div id="alertPost"></div>
-  </div>
-
-  <div class="card">
-    <h2>Budget Effectivity &amp; First-Month Proration<span class="tip" tabindex="0">i<span class="tip-content">Budgets are effective from the day they are set and cannot look back. If a budget starts mid-month, it governs only the remaining days of that first month. The recurring monthly budget to configure stays at the full-month value below.</span></span></h2>
-    <div id="effectivityBody"></div>
+    <div id="effectivityNote"></div>
   </div>
 
   <div class="card">
@@ -683,14 +696,26 @@ function computeEffective() {
 }
 
 function renderEffectivity() {
-  const body = document.getElementById('effectivityBody');
+  const periodEl = document.getElementById('asOfPeriod');
+  const coverageEl = document.getElementById('asOfCoverage');
+  const estEl = document.getElementById('asOfEntBudget');
+  const recurringEl = document.getElementById('asOfRecurringEntBudget');
+  const noteEl = document.getElementById('effectivityNote');
   const eff = computeEffective();
   if (!eff) {
-    body.innerHTML = '<p class="hint">Enter a valid budget set date to see effectivity.</p>';
+    periodEl.textContent = 'Enter a valid budget set date';
+    coverageEl.textContent = '–';
+    estEl.textContent = '–';
+    recurringEl.textContent = '–';
+    noteEl.innerHTML = '';
     return;
   }
   if (eff.active.totalSeats === 0) {
-    body.innerHTML = '<p class="hint">Enter seat counts to see effectivity figures.</p>';
+    periodEl.textContent = 'Enter seat counts';
+    coverageEl.textContent = '–';
+    estEl.textContent = '–';
+    recurringEl.textContent = '–';
+    noteEl.innerHTML = '';
     return;
   }
   const dateStr = new Date(eff.ymd.y, eff.ymd.mo - 1, eff.ymd.d)
@@ -708,24 +733,23 @@ function renderEffectivity() {
     noteClass = 'alert-success';
   }
 
-  const entBudgetStr = entBudgetDisplay(eff.active);
-  const partialRows = eff.factor < 1
-    ? '<tr><td>First month is partial (remaining days)</td><td class="promo">' + eff.daysRemaining + ' of ' + eff.daysInMonth + ' days (' + fmtPct(eff.factor) + ')</td></tr>' +
-      '<tr><td>First-month max overage exposure (estimate, remaining days)</td><td class="promo">' + fmt$(eff.proratedOverage) + '</td></tr>' +
-      '<tr><td>First-month effective budget (estimate, remaining days)<span class="tip" tabindex="0">i<span class="tip-content">An estimate of overage spend governed during the partial first month only. The recurring budget you configure in GitHub stays at the full-month value above — GitHub budgets are monthly caps and do not auto-prorate.</span></span></td><td class="promo">' + (eff.active.availableForOverage < 0 ? 'N/A' : fmt$(eff.proratedEntBudget)) + '</td></tr>'
-    : '<tr><td>First month is full</td><td class="promo">' + eff.daysInMonth + ' of ' + eff.daysInMonth + ' days (100%)</td></tr>';
+  const recurringBudgetStr = entBudgetDisplay(eff.active);
+  const firstMonthBudgetStr = eff.active.availableForOverage < 0 ? 'N/A' : fmt$(eff.proratedEntBudget);
+  const coverageStr = eff.factor < 1
+    ? eff.daysRemaining + ' of ' + eff.daysInMonth + ' days (' + fmtPct(eff.factor) + ')'
+    : eff.daysInMonth + ' of ' + eff.daysInMonth + ' days (100%)';
+  const periodStr = dateStr + ' — ' + eff.periodLabel;
 
-  body.innerHTML =
-    '<p class="hint" style="margin-top:0;">Budget set date: <strong>' + dateStr + '</strong> — ' + eff.periodLabel + '</p>' +
-    '<table class="results-table"><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody>' +
-    '<tr class="highlight"><td>Recurring monthly enterprise budget to configure</td><td class="promo">' + entBudgetStr + '</td></tr>' +
-    '<tr><td>Recommended Universal ULB ($/user, monthly)</td><td class="promo">' + fmt$2(eff.active.ulb) + '</td></tr>' +
-    partialRows +
-    '</tbody></table>' +
+  periodEl.textContent = periodStr;
+  coverageEl.textContent = coverageStr;
+  estEl.textContent = firstMonthBudgetStr;
+  recurringEl.textContent = recurringBudgetStr;
+
+  noteEl.innerHTML =
     '<div class="alert ' + noteClass + '"><strong>Effective from ' + dateStr + '</strong>' + note + '</div>' +
     (eff.active.availableForOverage < 0
       ? '<div class="alert alert-error"><strong>No enterprise budget to set</strong>The Total Customer Budget does not cover the monthly license fees, so there is nothing left for overage. Do <b>not</b> set the enterprise budget to $0 — a $0 budget blocks all metered usage immediately. Raise the Total Customer Budget above the license fees first.</div>'
-      : '<div class="alert alert-warn"><strong>Budgets cannot look back</strong>The budget governs usage only from ' + dateStr + ' forward. Any usage earlier in the month is not covered. The recurring monthly budget to set in GitHub admin is the full-month value (' + entBudgetStr + '); the partial-month figures above are estimates for the first month only.</div>');
+      : '<div class="alert alert-warn"><strong>Budgets cannot look back</strong>The budget governs usage only from ' + dateStr + ' forward. Any usage earlier in the month is not covered. The first-month estimate above reflects remaining days; the recurring monthly budget to configure is ' + recurringBudgetStr + '.</div>');
 }
 
 function render() {
