@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>How to Automate — GitHub Copilot Budgets &amp; Cost Centers</title>
+<style>
+:root {
+  --bg: #f6f8fa;
+  --card-bg: #ffffff;
+  --text: #1f2328;
+  --text-muted: #656d76;
+  --border: #d0d7de;
+  --accent: #0969da;
+  --accent-dark: #0550ae;
+  --header-bg: #1f4e78;
+  --header-text: #ffffff;
+  --input-bg: #fff8c5;
+  --input-border: #d4a72c;
+  --input-text: #0550ae;
+  --success-bg: #dafbe1;
+  --success-text: #1a7f37;
+  --warn-bg: #fff8c5;
+  --warn-text: #9a6700;
+  --error-bg: #ffebe9;
+  --error-text: #cf222e;
+  --promo-bg: #ddf4ff;
+  --code-bg: #f6f8fa;
+  --code-text: #1f2328;
+  --code-border: #d0d7de;
+  --tab-bg: #eaeef2;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --card-bg: #161b22;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --border: #30363d;
+    --accent: #2f81f7;
+    --accent-dark: #58a6ff;
+    --header-bg: #1f4e78;
+    --header-text: #ffffff;
+    --input-bg: #2d2410;
+    --input-border: #d4a72c;
+    --input-text: #79c0ff;
+    --success-bg: #033a16;
+    --success-text: #56d364;
+    --warn-bg: #3a2a00;
+    --warn-text: #d4a72c;
+    --error-bg: #4c1d1d;
+    --error-text: #ff7b72;
+    --promo-bg: #0d2438;
+    --code-bg: #0d1117;
+    --code-text: #e6edf3;
+    --code-border: #30363d;
+    --tab-bg: #21262d;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px;
+}
+header {
+  background: var(--header-bg);
+  color: var(--header-text);
+  padding: 28px 24px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 6px;
+}
+.brand svg { width: 40px; height: 40px; flex-shrink: 0; }
+header h1 { margin: 0 0 4px 0; font-size: 24px; font-weight: 600; }
+header p { margin: 0; opacity: 0.85; font-size: 14px; }
+.topnav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.backlink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card-bg);
+}
+.backlink:hover { text-decoration: underline; }
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+.card h2 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.card h2 .num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--header-bg);
+  color: #fff;
+  font-size: 14px;
+  margin-inline-end: 8px;
+}
+.card h3 { font-size: 15px; margin: 18px 0 8px 0; color: var(--text); }
+.card p { font-size: 14px; }
+.disclaimer {
+  background: var(--warn-bg);
+  color: var(--warn-text);
+  border: 1px solid var(--input-border);
+  border-inline-start: 5px solid var(--input-border);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  font-size: 13px;
+}
+.disclaimer strong { font-size: 14px; }
+.disclaimer a { color: var(--accent); font-weight: 600; }
+.when-box {
+  background: var(--promo-bg);
+  border-inline-start: 4px solid var(--accent);
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-size: 13px;
+  margin: 12px 0 16px 0;
+}
+.when-box > strong:first-child { display: block; margin-bottom: 4px; color: var(--text); }
+.new-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: var(--success-text);
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-inline-start: 8px;
+  vertical-align: middle;
+}
+.ref-list { margin: 8px 0 0 0; padding-inline-start: 18px; font-size: 13px; }
+.ref-list li { margin-bottom: 4px; }
+.ref-list a { color: var(--accent); font-weight: 600; text-decoration: none; }
+.ref-list a:hover { text-decoration: underline; }
+.note {
+  background: var(--warn-bg);
+  color: var(--warn-text);
+  border-inline-start: 4px solid var(--warn-text);
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  margin: 12px 0;
+}
+.note strong { display: block; margin-bottom: 3px; }
+/* Language selector */
+.lang-toggle {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+.lang-toggle .label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+.lang-tabs { display: inline-flex; background: var(--tab-bg); border-radius: 8px; padding: 4px; gap: 4px; }
+.lang-tab {
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 7px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.lang-tab:hover { color: var(--accent); }
+.lang-tab[aria-selected="true"] {
+  background: var(--card-bg);
+  color: var(--accent);
+  box-shadow: var(--shadow);
+}
+.lang-tab svg { width: 16px; height: 16px; }
+/* Code blocks */
+.code-block { margin: 10px 0 4px 0; }
+.code-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--tab-bg);
+  border: 1px solid var(--code-border);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.code-head .verb {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  color: var(--accent);
+}
+.copy-btn {
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 4px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+.copy-btn.copied { color: var(--success-text); border-color: var(--success-text); }
+pre {
+  margin: 0;
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  border-radius: 0 0 8px 8px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+code { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; color: var(--code-text); }
+.lang-curl { display: none; }
+body[data-lang="curl"] .lang-gh { display: none; }
+body[data-lang="curl"] .lang-curl { display: block; }
+.placeholder-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 8px;
+}
+.placeholder-table th, .placeholder-table td {
+  text-align: start;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.placeholder-table th { color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; }
+.placeholder-table td code { background: var(--tab-bg); padding: 1px 6px; border-radius: 4px; font-size: 12px; }
+.toc { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px; }
+.toc a {
+  display: block;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  background: var(--card-bg);
+}
+.toc a:hover { border-color: var(--accent); }
+.footer-link { color: var(--accent); font-weight: 600; text-decoration: none; }
+.footer-link:hover { text-decoration: underline; }
+footer {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 16px 0 8px 0;
+}
+@media (max-width: 700px) {
+  .container { padding: 12px; }
+  pre { font-size: 11.5px; }
+}
+</style>
+</head>
+<body data-lang="gh">
+<div class="container">
+
+  <header>
+    <div class="brand">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.922 16.992c-.861 1.495-5.859 5.023-11.922 5.023-6.063 0-11.061-3.528-11.922-5.023A.641.641 0 0 1 0 16.736v-2.869a.841.841 0 0 1 .053-.22c.372-.935 1.347-2.292 2.605-2.656.167-.429.414-1.055.644-1.517a10.195 10.195 0 0 1-.052-1.086c0-1.331.282-2.499 1.132-3.368.397-.406.89-.717 1.474-.952 1.399-1.136 3.392-2.093 6.122-2.093 2.731 0 4.767.957 6.166 2.093.584.235 1.077.546 1.474.952.85.869 1.132 2.037 1.132 3.368 0 .368-.014.733-.052 1.086.23.462.477 1.088.644 1.517 1.258.364 2.233 1.721 2.605 2.656a.832.832 0 0 1 .053.22v2.869a.641.641 0 0 1-.078.256ZM12.172 11h-.344a4.323 4.323 0 0 1-.355.508C10.703 12.455 9.555 13 7.965 13c-1.725 0-2.989-.359-3.782-1.259a2.005 2.005 0 0 1-.085-.104L4 11.741v6.585c1.435.779 4.514 2.179 8 2.179 3.486 0 6.565-1.4 8-2.179v-6.585l-.098-.104s-.033.045-.085.104c-.793.9-2.057 1.259-3.782 1.259-1.59 0-2.738-.545-3.508-1.492a4.323 4.323 0 0 1-.355-.508h-.016.016Zm.641-2.935c.136 1.057.403 1.913.878 2.497.442.544 1.134.938 2.344.938 1.573 0 2.292-.337 2.657-.751.384-.435.558-1.15.558-2.361 0-1.14-.243-1.847-.705-2.319-.477-.488-1.319-.862-2.824-1.025-1.487-.161-2.192.138-2.533.529-.269.307-.437.808-.438 1.578v.021c0 .265.021.562.063.893Zm-1.626 0c.042-.331.063-.628.063-.894v-.02c-.001-.77-.169-1.271-.438-1.578-.341-.391-1.046-.69-2.533-.529-1.505.163-2.347.537-2.824 1.025-.462.472-.705 1.179-.705 2.319 0 1.211.175 1.926.558 2.361.365.414 1.084.751 2.657.751 1.21 0 1.902-.394 2.344-.938.475-.584.742-1.44.878-2.497Z"/><path d="M14.5 14.25a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0v-2a1 1 0 0 1 1-1Zm-5 0a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0v-2a1 1 0 0 1 1-1Z"/></svg>
+      <h1>How to Automate Copilot Budgets &amp; Cost Centers</h1>
+    </div>
+    <p>REST API recipes for common budgeting scenarios — GitHub CLI and cURL</p>
+  </header>
+
+  <div class="topnav">
+    <a class="backlink" href="index.html">← Back to the Budget Sizing Calculator</a>
+  </div>
+
+  <div class="disclaimer">
+    <strong>⚠ Always verify against the latest documentation.</strong>
+    These recipes automate the same controls the calculator helps you size. API shapes, SKU names, scopes, and feature availability change over time. Confirm every command against the official
+    <a href="https://docs.github.com/en/billing/tutorials/control-costs-at-scale" target="_blank" rel="noopener">Controlling and tracking costs at scale</a> tutorial and the
+    <a href="https://docs.github.com/en/rest/enterprise-admin/billing?apiVersion=2022-11-28" target="_blank" rel="noopener">REST API endpoints for billing</a> reference before running them against production.
+  </div>
+
+  <div class="card">
+    <h2>Scenarios</h2>
+    <ul class="toc">
+      <li><a href="#s1">1. Create an enterprise budget</a></li>
+      <li><a href="#s2">2. Create a default User-Level Budget (ULB)</a></li>
+      <li><a href="#s3">3. Create an individual user budget</a></li>
+      <li><a href="#s4">4. Create a cost center &amp; cost center budget</a></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Before you start</h2>
+    <p>All endpoints below require enterprise <strong>admin</strong> or <strong>billing manager</strong> permissions, and the enterprise must be on the enhanced billing platform with AI credit paid usage enabled. Use the selector below to switch every command on the page between GitHub CLI and cURL.</p>
+    <h3>Authentication</h3>
+    <p><strong>GitHub CLI</strong> uses your existing <code>gh auth login</code> session, so no token appears in the command. <strong>cURL</strong> requires a token (classic PAT with <code>manage_billing:enterprise</code>, or a fine-grained token / GitHub App with enterprise billing permissions) supplied as a Bearer header — store it in an environment variable rather than pasting it inline.</p>
+    <h3>Placeholders used throughout</h3>
+    <table class="placeholder-table">
+      <thead><tr><th>Placeholder</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>ENTERPRISE</code></td><td>The slug of your enterprise (from the enterprise URL)</td></tr>
+        <tr><td><code>GH_TOKEN</code></td><td>Environment variable holding your access token (cURL only)</td></tr>
+        <tr><td><code>USERNAME</code></td><td>A GitHub login (for individual budgets / alert recipients)</td></tr>
+        <tr><td><code>COST_CENTER_ID</code></td><td>The UUID returned when you create a cost center</td></tr>
+      </tbody>
+    </table>
+    <div class="note">
+      <strong>Budget type &amp; SKU naming</strong>
+      These recipes use <code>budget_type=BundlePricing</code> with <code>budget_product_sku=ai_credits</code> to cover all AI credit usage, matching the <a href="https://raw.githubusercontent.com/github/docs/main/src/rest/data/ghec-2026-03-10/billing.json" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">billing REST schema</a>. The control-costs-at-scale tutorial shows an equivalent SKU-level form (<code>budget_type=SkuPricing</code>, <code>budget_product_sku=copilot_ai_credits</code>). If one form is rejected by your enterprise's API version, try the other.
+    </div>
+  </div>
+
+  <!-- LANGUAGE SELECTOR -->
+  <div class="lang-toggle">
+    <div class="lang-tabs" role="tablist" aria-label="Command language">
+      <button class="lang-tab" role="tab" id="tab-gh" aria-selected="true" data-lang="gh">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        GitHub CLI
+      </button>
+      <button class="lang-tab" role="tab" id="tab-curl" aria-selected="false" data-lang="curl">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4.72 3.22a.75.75 0 0 1 1.06 1.06L2.06 8l3.72 3.72a.75.75 0 1 1-1.06 1.06L.47 8.53a.75.75 0 0 1 0-1.06l4.25-4.25Zm6.56 0a.75.75 0 1 0-1.06 1.06L13.94 8l-3.72 3.72a.75.75 0 1 0 1.06 1.06l4.25-4.25a.75.75 0 0 0 0-1.06l-4.25-4.25Z"/></svg>
+        cURL
+      </button>
+    </div>
+    <span class="label" id="langHint">Using GitHub CLI — runs against your <code>gh auth login</code> session</span>
+  </div>
+
+  <!-- SCENARIO 1 -->
+  <div class="card" id="s1">
+    <h2><span class="num">1</span>Create an enterprise budget</h2>
+    <div class="when-box">
+      <strong>When to use</strong>
+      Set one enterprise-wide ceiling on metered AI credit spend as a financial backstop. This is the broadest control — it governs total enterprise metered charges across every user and cost center once the shared pool is exhausted. Use it to guarantee the bill never exceeds a hard number. Enable <code>prevent_further_usage</code> to make it a hard stop (off by default in the UI).
+    </div>
+    <ul class="ref-list">
+      <li>Reference: <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#enterprise-budget" target="_blank" rel="noopener">Enterprise budget — Budgets for usage-based billing</a></li>
+      <li>API: <a href="https://docs.github.com/en/rest/enterprise-admin/billing?apiVersion=2022-11-28#create-a-budget" target="_blank" rel="noopener">Create a budget</a></li>
+    </ul>
+
+    <div class="code-block">
+      <div class="lang-gh">
+        <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/settings/billing/budgets</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre><code>gh api \
+  --method POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  /enterprises/$ENTERPRISE/settings/billing/budgets \
+  -f budget_type='BundlePricing' \
+  -f budget_product_sku='ai_credits' \
+  -f budget_scope='enterprise' \
+  -f budget_entity_name='' \
+  -F budget_amount=50000 \
+  -F prevent_further_usage=true \
+  -f budget_alerting='{"will_alert":true,"alert_recipients":["enterprise-admin"]}'</code></pre>
+      </div>
+      <div class="lang-curl">
+        <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/settings/billing/budgets</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre><code>curl -L \
+  -X POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer $GH_TOKEN" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/enterprises/$ENTERPRISE/settings/billing/budgets \
+  -d '{
+    "budget_type": "BundlePricing",
+    "budget_product_sku": "ai_credits",
+    "budget_scope": "enterprise",
+    "budget_entity_name": "",
+    "budget_amount": 50000,
+    "prevent_further_usage": true,
+    "budget_alerting": { "will_alert": true, "alert_recipients": ["enterprise-admin"] }
+  }'</code></pre>
+      </div>
+    </div>
+    <p class="card-foot" style="font-size:12.5px;color:var(--text-muted);margin:8px 0 0 0;"><code>budget_amount</code> is in whole US dollars. The enterprise scope needs no <code>budget_entity_name</code>.</p>
+  </div>
+
+  <!-- SCENARIO 2 -->
+  <div class="card" id="s2">
+    <h2><span class="num">2</span>Create a default User-Level Budget (ULB)</h2>
+    <div class="when-box">
+      <strong>When to use</strong>
+      Apply the <em>same</em> per-user AI credit cap to every user at once — without creating a budget per person. This is the recommended baseline control: it stops any single user from draining the shared pool or running up unbounded metered charges. Use the calculator's <strong>Universal ULB</strong> recommendation for the amount. The <code>multi_user_customer</code> scope creates one budget that GitHub enforces per user; <code>prevent_further_usage</code> must be <code>true</code> (ULBs are always a hard stop).
+    </div>
+    <ul class="ref-list">
+      <li>Reference: <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#user-level-budget" target="_blank" rel="noopener">User-level budget — Budgets for usage-based billing</a></li>
+      <li>API: <a href="https://docs.github.com/en/rest/enterprise-admin/billing?apiVersion=2022-11-28#create-a-budget" target="_blank" rel="noopener">Create a budget</a> · <a href="https://docs.github.com/en/rest/enterprise-admin/billing?apiVersion=2022-11-28#get-user-states-for-a-multi-user-budget" target="_blank" rel="noopener">Get per-user states</a></li>
+    </ul>
+
+    <div class="code-block">
+      <div class="lang-gh">
+        <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/settings/billing/budgets</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre><code>gh api \
+  --method POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  /enterprises/$ENTERPRISE/settings/billing/budgets \
+  -f budget_type='BundlePricing' \
+  -f budget_product_sku='ai_credits' \
+  -f budget_scope='multi_user_customer' \
+  -F budget_amount=60 \
+  -F prevent_further_usage=true \
+  -f budget_alerting='{"will_alert":true,"alert_recipients":["enterprise-admin"]}'</code></pre>
+      </div>
+      <div class="lang-curl">
+        <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/settings/billing/budgets</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre><code>curl -L \
+  -X POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer $GH_TOKEN" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/enterprises/$ENTERPRISE/settings/billing/budgets \
+  -d '{
+    "budget_type": "BundlePricing",
+    "budget_product_sku": "ai_credits",
+    "budget_scope": "multi_user_customer",
+    "budget_amount": 60,
+    "prevent_further_usage": true,
+    "budget_alerting": { "will_alert": true, "alert_recipients": ["enterprise-admin"] }
+  }'</code></pre>
+      </div>
+    </div>
+    <p style="font-size:12.5px;color:var(--text-muted);margin:8px 0 0 0;">The <code>multi_user_customer</code> and <code>user</code> scopes are only valid when <code>budget_product_sku</code> is <code>ai_credits</code> or <code>premium_requests</code>. Inspect per-user consumption later with the <code>/budgets/{budget_id}/user-states</code> endpoint.</p>
+  </div>
+
+  <!-- SCENARIO 3 -->
+  <div class="card" id="s3">
+    <h2><span class="num">3</span>Create an individual user budget</h2>
+    <div class="when-box">
+      <strong>When to use</strong>
+      Override the default ULB for specific <strong>power users</strong> who legitimately need more headroom (or, occasionally, less). A <code>user</code>-scoped budget takes precedence over the default <code>multi_user_customer</code> ULB for that login. Create one of these per named power user instead of raising the default ULB for everyone. Remember: a higher personal ULB does not bypass the enterprise budget — lowest remaining headroom still wins. <code>prevent_further_usage</code> must be <code>true</code>.
+    </div>
+    <ul class="ref-list">
+      <li>Reference: <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#user-level-budget" target="_blank" rel="noopener">User-level budget — Budgets for usage-based billing</a></li>
+      <li>API: <a href="https://docs.github.com/en/rest/enterprise-admin/billing?apiVersion=2022-11-28#create-a-budget" target="_blank" rel="noopener">Create a budget</a></li>
+    </ul>
+
+    <div class="code-block">
+      <div class="lang-gh">
+        <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/settings/billing/budgets</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre><code>gh api \
+  --method POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  /enterprises/$ENTERPRISE/settings/billing/budgets \
+  -f budget_type='BundlePricing' \
+  -f budget_product_sku='ai_credits' \
+  -f budget_scope='user' \
+  -f user='$USERNAME' \
+  -F budget_amount=250 \
+  -F prevent_further_usage=true \
+  -f budget_alerting='{"will_alert":true,"alert_recipients":["$USERNAME"]}'</code></pre>
+      </div>
+      <div class="lang-curl">
+        <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/settings/billing/budgets</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre><code>curl -L \
+  -X POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer $GH_TOKEN" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/enterprises/$ENTERPRISE/settings/billing/budgets \
+  -d '{
+    "budget_type": "BundlePricing",
+    "budget_product_sku": "ai_credits",
+    "budget_scope": "user",
+    "user": "$USERNAME",
+    "budget_amount": 250,
+    "prevent_further_usage": true,
+    "budget_alerting": { "will_alert": true, "alert_recipients": ["$USERNAME"] }
+  }'</code></pre>
+      </div>
+    </div>
+    <p style="font-size:12.5px;color:var(--text-muted);margin:8px 0 0 0;">The <code>user</code> field is required for <code>user</code> scope and names the login the budget applies to.</p>
+  </div>
+
+  <!-- SCENARIO 4 -->
+  <div class="card" id="s4">
+    <h2><span class="num">4</span>Create a cost center &amp; cost center budget</h2>
+    <div class="when-box">
+      <strong>When to use</strong>
+      Group users, teams, organizations, or repositories into a <strong>cost center</strong> when you want to track and cap spending for a financial entity (a department, business unit, or project team) separately from the rest of the enterprise. Cost centers also enable the "excluded cost center" pattern for power-user teams that must never be blocked by the enterprise budget. The steps below create the cost center, populate it, and then attach budgets.
+    </div>
+    <ul class="ref-list">
+      <li>Reference: <a href="https://docs.github.com/en/billing/tutorials/control-costs-at-scale" target="_blank" rel="noopener">Controlling and tracking costs at scale</a> · <a href="https://docs.github.com/en/billing/reference/cost-center-allocation" target="_blank" rel="noopener">Cost center allocation for different products</a></li>
+      <li>API: <a href="https://docs.github.com/en/rest/enterprise-admin/billing?apiVersion=2022-11-28" target="_blank" rel="noopener">REST API endpoints for billing</a></li>
+    </ul>
+
+    <h3>4.1 — Create the cost center</h3>
+    <div class="code-block">
+      <div class="lang-gh">
+        <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/settings/billing/cost-centers</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre><code>gh api \
+  --method POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  /enterprises/$ENTERPRISE/settings/billing/cost-centers \
+  -f name='Engineering'
+# → response includes the new cost center "id" (a UUID). Save it as $COST_CENTER_ID.</code></pre>
+      </div>
+      <div class="lang-curl">
+        <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/settings/billing/cost-centers</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre><code>curl -L \
+  -X POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer $GH_TOKEN" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/enterprises/$ENTERPRISE/settings/billing/cost-centers \
+  -d '{ "name": "Engineering" }'
+# → response includes the new cost center "id" (a UUID). Save it as $COST_CENTER_ID.</code></pre>
+      </div>
+    </div>
+
+    <h3>4.2 — Assign users to the cost center</h3>
+    <p style="font-size:13px;margin:0 0 4px 0;">Assign individuals directly when you want their license and usage allocated to this cost center.</p>
+    <div class="code-block">
+      <div class="lang-gh">
+        <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/settings/billing/cost-centers/$COST_CENTER_ID/resource</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre><code>gh api \
+  --method POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  /enterprises/$ENTERPRISE/settings/billing/cost-centers/$COST_CENTER_ID/resource \
+  --input - &lt;&lt;'JSON'
+{ "users": ["monalisa", "octocat"] }
+JSON</code></pre>
+      </div>
+      <div class="lang-curl">
+        <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/settings/billing/cost-centers/$COST_CENTER_ID/resource</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre><code>curl -L \
+  -X POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer $GH_TOKEN" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/enterprises/$ENTERPRISE/settings/billing/cost-centers/$COST_CENTER_ID/resource \
+  -d '{ "users": ["monalisa", "octocat"] }'</code></pre>
+      </div>
+    </div>
+
+    <h3>4.3 — Assign enterprise teams to the cost center <span class="new-badge">New · Jun 25, 2026</span></h3>
+    <div class="when-box">
+      <strong>When to use</strong>
+      Assign a whole <strong>enterprise team</strong> instead of listing members one by one. Team membership flows into the cost center and stays current automatically as people join or leave — ideal for managing membership via your IdP without touching organization scope. Prefer this over per-user assignment whenever the group already maps to an enterprise team.
+    </div>
+    <ul class="ref-list">
+      <li>Changelog: <a href="https://github.blog/changelog/2026-06-25-assign-enterprise-teams-to-cost-centers/" target="_blank" rel="noopener">Assign enterprise teams to cost-centers</a></li>
+      <li>Reference: <a href="https://docs.github.com/en/enterprise-cloud@latest/admin/managing-accounts-and-repositories/managing-users-in-your-enterprise/create-enterprise-teams" target="_blank" rel="noopener">Creating enterprise teams</a></li>
+    </ul>
+    <div class="code-block">
+      <div class="lang-gh">
+        <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/settings/billing/cost-centers/$COST_CENTER_ID/resource</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre><code>gh api \
+  --method POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  /enterprises/$ENTERPRISE/settings/billing/cost-centers/$COST_CENTER_ID/resource \
+  --input - &lt;&lt;'JSON'
+{ "enterprise_teams": ["engineering-team"] }
+JSON</code></pre>
+      </div>
+      <div class="lang-curl">
+        <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/settings/billing/cost-centers/$COST_CENTER_ID/resource</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre><code>curl -L \
+  -X POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer $GH_TOKEN" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/enterprises/$ENTERPRISE/settings/billing/cost-centers/$COST_CENTER_ID/resource \
+  -d '{ "enterprise_teams": ["engineering-team"] }'</code></pre>
+      </div>
+    </div>
+
+    <h3>4.4 — Create a budget for the cost center</h3>
+    <p style="font-size:13px;margin:0 0 4px 0;">Cap total AI credit spend for everything allocated to the cost center. Use the cost center UUID as <code>budget_entity_name</code>.</p>
+    <div class="code-block">
+      <div class="lang-gh">
+        <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/settings/billing/budgets</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre><code>gh api \
+  --method POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  /enterprises/$ENTERPRISE/settings/billing/budgets \
+  -f budget_type='BundlePricing' \
+  -f budget_product_sku='ai_credits' \
+  -f budget_scope='cost_center' \
+  -f budget_entity_name='$COST_CENTER_ID' \
+  -F budget_amount=10000 \
+  -F prevent_further_usage=true \
+  -f budget_alerting='{"will_alert":true,"alert_recipients":["enterprise-admin"]}'</code></pre>
+      </div>
+      <div class="lang-curl">
+        <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/settings/billing/budgets</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre><code>curl -L \
+  -X POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer $GH_TOKEN" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/enterprises/$ENTERPRISE/settings/billing/budgets \
+  -d '{
+    "budget_type": "BundlePricing",
+    "budget_product_sku": "ai_credits",
+    "budget_scope": "cost_center",
+    "budget_entity_name": "$COST_CENTER_ID",
+    "budget_amount": 10000,
+    "prevent_further_usage": true,
+    "budget_alerting": { "will_alert": true, "alert_recipients": ["enterprise-admin"] }
+  }'</code></pre>
+      </div>
+    </div>
+
+    <h3>4.5 — Create a per-user ULB for the cost center <span class="new-badge">New · Jun 30, 2026</span></h3>
+    <div class="when-box">
+      <strong>When to use</strong>
+      Apply a single <strong>per-user</strong> AI credit cap to everyone in a cost center — without creating individual ULBs for each member. This combines the group management of cost centers (4.1–4.3) with per-user enforcement, so usage for a whole group stays governed as membership changes. Pair it with the cost center budget (4.4): the cost center budget caps the group's total, while this caps each member individually.
+    </div>
+    <ul class="ref-list">
+      <li>Changelog: <a href="https://github.blog/changelog/2026-06-30-per-user-ai-credit-budgets-available-for-cost-centers/" target="_blank" rel="noopener">Per-user AI credit budgets available for cost centers</a></li>
+    </ul>
+    <div class="code-block">
+      <div class="lang-gh">
+        <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/settings/billing/budgets</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre><code>gh api \
+  --method POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  /enterprises/$ENTERPRISE/settings/billing/budgets \
+  -f budget_type='BundlePricing' \
+  -f budget_product_sku='ai_credits' \
+  -f budget_scope='multi_user_cost_center' \
+  -f budget_entity_name='$COST_CENTER_ID' \
+  -F budget_amount=50 \
+  -F prevent_further_usage=true \
+  -f budget_alerting='{"will_alert":false,"alert_recipients":[]}'</code></pre>
+      </div>
+      <div class="lang-curl">
+        <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/settings/billing/budgets</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre><code>curl -L \
+  -X POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer $GH_TOKEN" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/enterprises/$ENTERPRISE/settings/billing/budgets \
+  -d '{
+    "budget_amount": 50,
+    "prevent_further_usage": true,
+    "budget_scope": "multi_user_cost_center",
+    "budget_entity_name": "$COST_CENTER_ID",
+    "budget_type": "BundlePricing",
+    "budget_product_sku": "ai_credits",
+    "budget_alerting": { "will_alert": false, "alert_recipients": [] }
+  }'</code></pre>
+      </div>
+    </div>
+    <div class="note">
+      <strong>Verify the cost-center ULB shape</strong>
+      Per-user cost-center budgets shipped on Jun 30, 2026. This recipe scopes a <code>multi_user_cost_center</code> budget to the cost center via <code>budget_entity_name</code>, per the internal <em>Spend controls field guide</em>. This scope value is not yet reflected in the public <a href="https://raw.githubusercontent.com/github/docs/main/src/rest/data/ghec-2026-03-10/billing.json" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">billing REST schema</a> (which only lists <code>enterprise</code>, <code>organization</code>, <code>repository</code>, <code>cost_center</code>, <code>multi_user_customer</code>, <code>user</code>) — confirm against the latest <a href="https://docs.github.com/en/rest/enterprise-admin/billing?apiVersion=2022-11-28" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">billing REST reference</a> and the <a href="https://github.blog/changelog/2026-06-30-per-user-ai-credit-budgets-available-for-cost-centers/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">changelog</a> before relying on it.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Managing budgets you create</h2>
+    <p>Every <code>POST</code> to <code>/budgets</code> returns the new budget's <code>id</code>. Use these read/update/delete endpoints to manage them afterward:</p>
+    <ul class="ref-list">
+      <li><code>GET /enterprises/$ENTERPRISE/settings/billing/budgets</code> — <a href="https://docs.github.com/en/rest/enterprise-admin/billing?apiVersion=2022-11-28#get-all-budgets" target="_blank" rel="noopener">List all budgets</a> (filter with <code>?scope=enterprise|cost_center|user|multi_user_customer|multi_user_cost_center</code>)</li>
+      <li><code>PATCH /enterprises/$ENTERPRISE/settings/billing/budgets/$BUDGET_ID</code> — <a href="https://docs.github.com/en/rest/enterprise-admin/billing?apiVersion=2022-11-28#update-a-budget" target="_blank" rel="noopener">Update a budget</a></li>
+      <li><code>DELETE /enterprises/$ENTERPRISE/settings/billing/budgets/$BUDGET_ID</code> — <a href="https://docs.github.com/en/rest/enterprise-admin/billing?apiVersion=2022-11-28#delete-a-budget" target="_blank" rel="noopener">Delete a budget</a></li>
+      <li><code>GET /enterprises/$ENTERPRISE/settings/billing/cost-centers</code> — <a href="https://docs.github.com/en/rest/enterprise-admin/billing?apiVersion=2022-11-28" target="_blank" rel="noopener">List cost centers</a> to discover existing <code>$COST_CENTER_ID</code> values</li>
+    </ul>
+    <div class="note">
+      <strong>Ready-made automation</strong>
+      For a complete, maintained implementation (including a two-tier model for AI credits and team-driven cost centers), see <a href="https://github.com/github/cost-center-automation" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">github/cost-center-automation</a>.
+    </div>
+  </div>
+
+  <footer>
+    Based on <a class="footer-link" href="https://docs.github.com/en/billing/tutorials/control-costs-at-scale" target="_blank" rel="noopener">Controlling and tracking costs at scale ↗</a>
+    and <a class="footer-link" href="https://docs.github.com/en/rest/enterprise-admin/billing?apiVersion=2022-11-28" target="_blank" rel="noopener">REST API endpoints for billing ↗</a>
+    <div style="margin-top: 8px; font-weight: 600; color: var(--warn-text);">⚠ Always verify endpoints, scopes, and SKU names against the latest official GitHub documentation.</div>
+  </footer>
+
+</div>
+
+<script>
+// Language selector
+const body = document.body;
+const tabs = document.querySelectorAll('.lang-tab');
+const hint = document.getElementById('langHint');
+const hintText = {
+  gh: 'Using GitHub CLI — runs against your <code>gh auth login</code> session',
+  curl: 'Using cURL — supply a token via the <code>$GH_TOKEN</code> environment variable'
+};
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    const lang = tab.dataset.lang;
+    body.dataset.lang = lang;
+    tabs.forEach(t => t.setAttribute('aria-selected', String(t === tab)));
+    hint.innerHTML = hintText[lang];
+  });
+});
+
+// Copy buttons
+document.querySelectorAll('.copy-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const pre = btn.closest('.lang-gh, .lang-curl').querySelector('pre code');
+    const text = pre.innerText;
+    try {
+      await navigator.clipboard.writeText(text);
+      const original = btn.textContent;
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = original; btn.classList.remove('copied'); }, 1500);
+    } catch (e) {
+      btn.textContent = 'Press Ctrl+C';
+      setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+    }
+  });
+});
+</script>
+</body>
+</html>
