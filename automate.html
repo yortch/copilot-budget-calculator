@@ -351,6 +351,10 @@ footer {
   <div class="card">
     <h2>Before you start</h2>
     <p>All endpoints below require enterprise <strong>admin</strong> or <strong>billing manager</strong> permissions, and the enterprise must be on the enhanced billing platform with AI credit paid usage enabled. Use the selector below to switch every command on the page between GitHub CLI and cURL.</p>
+    <div class="note">
+      <strong>Git Bash tip for <code>gh api</code></strong>
+      The GitHub CLI examples use JSON via <code>--input - &lt;&lt;JSON</code> so placeholders like <code>$USERNAME</code> expand correctly in Git Bash, and include <code>--silent</code> to avoid parse issues like <code>unexpected end of JSON input</code> on empty responses. Remove <code>--silent</code> if you want the response body (for example, to capture the new budget <code>id</code>).
+    </div>
     <h3>Authentication</h3>
     <p><strong>GitHub CLI</strong> uses your existing <code>gh auth login</code> session, so no token appears in the command. <strong>cURL</strong> requires a token (classic PAT with <code>manage_billing:enterprise</code>, or a fine-grained token / GitHub App with enterprise billing permissions) supplied as a Bearer header — store it in an environment variable rather than pasting it inline.</p>
     <h3>Placeholders used throughout</h3>
@@ -399,18 +403,22 @@ footer {
     <div class="code-block">
       <div class="lang-gh">
         <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/settings/billing/budgets</span><button class="copy-btn" type="button">Copy</button></div>
-        <pre><code>gh api \
+        <pre><code>gh api --silent \
   --method POST \
   -H "Accept: application/vnd.github+json" \
+  -H "Content-Type: application/json" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
-  /enterprises/$ENTERPRISE/settings/billing/budgets \
-  -f budget_type='BundlePricing' \
-  -f budget_product_sku='ai_credits' \
-  -f budget_scope='enterprise' \
-  -f budget_entity_name='' \
-  -F budget_amount=50000 \
-  -F prevent_further_usage=true \
-  -f budget_alerting='{"will_alert":true,"alert_recipients":["enterprise-admin"]}'</code></pre>
+  "/enterprises/$ENTERPRISE/settings/billing/budgets" \
+  --input - &lt;&lt;JSON
+{
+  "budget_type": "BundlePricing",
+  "budget_product_sku": "ai_credits",
+  "budget_scope": "enterprise",
+  "budget_amount": 50000,
+  "prevent_further_usage": true,
+  "budget_alerting": { "will_alert": true, "alert_recipients": ["$USERNAME"] }
+}
+JSON</code></pre>
       </div>
       <div class="lang-curl">
         <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/settings/billing/budgets</span><button class="copy-btn" type="button">Copy</button></div>
@@ -424,10 +432,9 @@ footer {
     "budget_type": "BundlePricing",
     "budget_product_sku": "ai_credits",
     "budget_scope": "enterprise",
-    "budget_entity_name": "",
     "budget_amount": 50000,
     "prevent_further_usage": true,
-    "budget_alerting": { "will_alert": true, "alert_recipients": ["enterprise-admin"] }
+    "budget_alerting": { "will_alert": true, "alert_recipients": ["$USERNAME"] }
   }'</code></pre>
       </div>
     </div>
@@ -449,17 +456,22 @@ footer {
     <div class="code-block">
       <div class="lang-gh">
         <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/settings/billing/budgets</span><button class="copy-btn" type="button">Copy</button></div>
-        <pre><code>gh api \
+        <pre><code>gh api --silent \
   --method POST \
   -H "Accept: application/vnd.github+json" \
+  -H "Content-Type: application/json" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
-  /enterprises/$ENTERPRISE/settings/billing/budgets \
-  -f budget_type='BundlePricing' \
-  -f budget_product_sku='ai_credits' \
-  -f budget_scope='multi_user_customer' \
-  -F budget_amount=60 \
-  -F prevent_further_usage=true \
-  -f budget_alerting='{"will_alert":true,"alert_recipients":["enterprise-admin"]}'</code></pre>
+  "/enterprises/$ENTERPRISE/settings/billing/budgets" \
+  --input - &lt;&lt;JSON
+{
+  "budget_type": "BundlePricing",
+  "budget_product_sku": "ai_credits",
+  "budget_scope": "multi_user_customer",
+  "budget_amount": 60,
+  "prevent_further_usage": true,
+  "budget_alerting": { "will_alert": true, "alert_recipients": ["$USERNAME"] }
+}
+JSON</code></pre>
       </div>
       <div class="lang-curl">
         <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/settings/billing/budgets</span><button class="copy-btn" type="button">Copy</button></div>
@@ -475,7 +487,7 @@ footer {
     "budget_scope": "multi_user_customer",
     "budget_amount": 60,
     "prevent_further_usage": true,
-    "budget_alerting": { "will_alert": true, "alert_recipients": ["enterprise-admin"] }
+    "budget_alerting": { "will_alert": true, "alert_recipients": ["$USERNAME"] }
   }'</code></pre>
       </div>
     </div>
@@ -497,18 +509,23 @@ footer {
     <div class="code-block">
       <div class="lang-gh">
         <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/settings/billing/budgets</span><button class="copy-btn" type="button">Copy</button></div>
-        <pre><code>gh api \
+        <pre><code>gh api --silent \
   --method POST \
   -H "Accept: application/vnd.github+json" \
+  -H "Content-Type: application/json" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
-  /enterprises/$ENTERPRISE/settings/billing/budgets \
-  -f budget_type='BundlePricing' \
-  -f budget_product_sku='ai_credits' \
-  -f budget_scope='user' \
-  -f user='$USERNAME' \
-  -F budget_amount=250 \
-  -F prevent_further_usage=true \
-  -f budget_alerting='{"will_alert":true,"alert_recipients":["$USERNAME"]}'</code></pre>
+  "/enterprises/$ENTERPRISE/settings/billing/budgets" \
+  --input - &lt;&lt;JSON
+{
+  "budget_type": "BundlePricing",
+  "budget_product_sku": "ai_credits",
+  "budget_scope": "user",
+  "user": "$USERNAME",
+  "budget_amount": 250,
+  "prevent_further_usage": true,
+  "budget_alerting": { "will_alert": true, "alert_recipients": ["$USERNAME"] }
+}
+JSON</code></pre>
       </div>
       <div class="lang-curl">
         <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/settings/billing/budgets</span><button class="copy-btn" type="button">Copy</button></div>
@@ -579,8 +596,8 @@ footer {
   -H "Accept: application/vnd.github+json" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
   /enterprises/$ENTERPRISE/settings/billing/cost-centers/$COST_CENTER_ID/resource \
-  --input - &lt;&lt;'JSON'
-{ "users": ["monalisa", "octocat"] }
+  --input - &lt;&lt;JSON
+{ "users": ["$USERNAME"] }
 JSON</code></pre>
       </div>
       <div class="lang-curl">
@@ -591,7 +608,7 @@ JSON</code></pre>
   -H "Authorization: Bearer $GH_TOKEN" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
   https://api.github.com/enterprises/$ENTERPRISE/settings/billing/cost-centers/$COST_CENTER_ID/resource \
-  -d '{ "users": ["monalisa", "octocat"] }'</code></pre>
+  -d '{ "users": ["$USERNAME"] }'</code></pre>
       </div>
     </div>
 
@@ -604,6 +621,66 @@ JSON</code></pre>
       <li>Changelog: <a href="https://github.blog/changelog/2026-06-25-assign-enterprise-teams-to-cost-centers/" target="_blank" rel="noopener">Assign enterprise teams to cost-centers</a></li>
       <li>Reference: <a href="https://docs.github.com/en/enterprise-cloud@latest/admin/managing-accounts-and-repositories/managing-users-in-your-enterprise/create-enterprise-teams" target="_blank" rel="noopener">Creating enterprise teams</a></li>
     </ul>
+
+    <h3>4.3.1 — Create the enterprise team</h3>
+    <p style="font-size:13px;margin:0 0 4px 0;">Create an enterprise team once, then add users and assign it to a cost center.</p>
+    <div class="code-block">
+      <div class="lang-gh">
+        <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/teams</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre><code>gh api \
+  --method POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  "/enterprises/$ENTERPRISE/teams" \
+  --input - &lt;&lt;JSON
+{
+  "name": "Engineering Team",
+  "slug": "engineering-team"
+}
+JSON</code></pre>
+      </div>
+      <div class="lang-curl">
+        <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/teams</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre><code>curl -L \
+  -X POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer $GH_TOKEN" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/enterprises/$ENTERPRISE/teams \
+  -d '{
+    "name": "Engineering Team",
+    "slug": "engineering-team"
+  }'</code></pre>
+      </div>
+    </div>
+
+    <h3>4.3.2 — Add a user to the enterprise team</h3>
+    <p style="font-size:13px;margin:0 0 4px 0;">Use the team slug and GitHub login to add members explicitly.</p>
+    <div class="code-block">
+      <div class="lang-gh">
+        <div class="code-head"><span><span class="verb">PUT</span> /enterprises/$ENTERPRISE/teams/engineering-team/memberships/$USERNAME</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre><code>gh api \
+  --method PUT \
+  -H "Accept: application/vnd.github+json" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  "/enterprises/$ENTERPRISE/teams/engineering-team/memberships/$USERNAME" \
+  --input - &lt;&lt;JSON
+{ "role": "member" }
+JSON</code></pre>
+      </div>
+      <div class="lang-curl">
+        <div class="code-head"><span><span class="verb">PUT</span> /enterprises/$ENTERPRISE/teams/engineering-team/memberships/$USERNAME</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre><code>curl -L \
+  -X PUT \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer $GH_TOKEN" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/enterprises/$ENTERPRISE/teams/engineering-team/memberships/$USERNAME \
+  -d '{ "role": "member" }'</code></pre>
+      </div>
+    </div>
+
+    <h3>4.3.3 — Assign the enterprise team to the cost center</h3>
     <div class="code-block">
       <div class="lang-gh">
         <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/settings/billing/cost-centers/$COST_CENTER_ID/resource</span><button class="copy-btn" type="button">Copy</button></div>
@@ -612,7 +689,7 @@ JSON</code></pre>
   -H "Accept: application/vnd.github+json" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
   /enterprises/$ENTERPRISE/settings/billing/cost-centers/$COST_CENTER_ID/resource \
-  --input - &lt;&lt;'JSON'
+  --input - &lt;&lt;JSON
 { "enterprise_teams": ["engineering-team"] }
 JSON</code></pre>
       </div>
@@ -627,24 +704,34 @@ JSON</code></pre>
   -d '{ "enterprise_teams": ["engineering-team"] }'</code></pre>
       </div>
     </div>
+    <div class="note">
+      <strong>Multiple-team precedence</strong>
+      Scenario: a user belongs to multiple enterprise teams that are assigned to different cost centers.
+      Result: the cost center for the oldest team (by creation date) is applied.
+    </div>
 
     <h3>4.4 — Create a budget for the cost center</h3>
     <p style="font-size:13px;margin:0 0 4px 0;">Cap total AI credit spend for everything allocated to the cost center. Use the cost center UUID as <code>budget_entity_name</code>.</p>
     <div class="code-block">
       <div class="lang-gh">
         <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/settings/billing/budgets</span><button class="copy-btn" type="button">Copy</button></div>
-        <pre><code>gh api \
+        <pre><code>gh api --silent \
   --method POST \
   -H "Accept: application/vnd.github+json" \
+  -H "Content-Type: application/json" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
-  /enterprises/$ENTERPRISE/settings/billing/budgets \
-  -f budget_type='BundlePricing' \
-  -f budget_product_sku='ai_credits' \
-  -f budget_scope='cost_center' \
-  -f budget_entity_name='$COST_CENTER_ID' \
-  -F budget_amount=10000 \
-  -F prevent_further_usage=true \
-  -f budget_alerting='{"will_alert":true,"alert_recipients":["enterprise-admin"]}'</code></pre>
+  "/enterprises/$ENTERPRISE/settings/billing/budgets" \
+  --input - &lt;&lt;JSON
+{
+  "budget_type": "BundlePricing",
+  "budget_product_sku": "ai_credits",
+  "budget_scope": "cost_center",
+  "budget_entity_name": "$COST_CENTER_ID",
+  "budget_amount": 10000,
+  "prevent_further_usage": true,
+  "budget_alerting": { "will_alert": true, "alert_recipients": ["$USERNAME"] }
+}
+JSON</code></pre>
       </div>
       <div class="lang-curl">
         <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/settings/billing/budgets</span><button class="copy-btn" type="button">Copy</button></div>
@@ -661,7 +748,7 @@ JSON</code></pre>
     "budget_entity_name": "$COST_CENTER_ID",
     "budget_amount": 10000,
     "prevent_further_usage": true,
-    "budget_alerting": { "will_alert": true, "alert_recipients": ["enterprise-admin"] }
+    "budget_alerting": { "will_alert": true, "alert_recipients": ["$USERNAME"] }
   }'</code></pre>
       </div>
     </div>
@@ -677,18 +764,23 @@ JSON</code></pre>
     <div class="code-block">
       <div class="lang-gh">
         <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/settings/billing/budgets</span><button class="copy-btn" type="button">Copy</button></div>
-        <pre><code>gh api \
+        <pre><code>gh api --silent \
   --method POST \
   -H "Accept: application/vnd.github+json" \
+  -H "Content-Type: application/json" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
-  /enterprises/$ENTERPRISE/settings/billing/budgets \
-  -f budget_type='BundlePricing' \
-  -f budget_product_sku='ai_credits' \
-  -f budget_scope='multi_user_cost_center' \
-  -f budget_entity_name='$COST_CENTER_ID' \
-  -F budget_amount=50 \
-  -F prevent_further_usage=true \
-  -f budget_alerting='{"will_alert":false,"alert_recipients":[]}'</code></pre>
+  "/enterprises/$ENTERPRISE/settings/billing/budgets" \
+  --input - &lt;&lt;JSON
+{
+  "budget_type": "BundlePricing",
+  "budget_product_sku": "ai_credits",
+  "budget_scope": "multi_user_cost_center",
+  "budget_entity_name": "$COST_CENTER_ID",
+  "budget_amount": 50,
+  "prevent_further_usage": true,
+  "budget_alerting": { "will_alert": false, "alert_recipients": [] }
+}
+JSON</code></pre>
       </div>
       <div class="lang-curl">
         <div class="code-head"><span><span class="verb">POST</span> /enterprises/$ENTERPRISE/settings/billing/budgets</span><button class="copy-btn" type="button">Copy</button></div>
@@ -708,10 +800,6 @@ JSON</code></pre>
     "budget_alerting": { "will_alert": false, "alert_recipients": [] }
   }'</code></pre>
       </div>
-    </div>
-    <div class="note">
-      <strong>Verify the cost-center ULB shape</strong>
-      Per-user cost-center budgets shipped on Jun 30, 2026. This recipe scopes a <code>multi_user_cost_center</code> budget to the cost center via <code>budget_entity_name</code>, per the internal <em>Spend controls field guide</em>. This scope value is not yet reflected in the public <a href="https://raw.githubusercontent.com/github/docs/main/src/rest/data/ghec-2026-03-10/billing.json" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">billing REST schema</a> (which only lists <code>enterprise</code>, <code>organization</code>, <code>repository</code>, <code>cost_center</code>, <code>multi_user_customer</code>, <code>user</code>) — confirm against the latest <a href="https://docs.github.com/en/rest/enterprise-admin/billing?apiVersion=2022-11-28" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">billing REST reference</a> and the <a href="https://github.blog/changelog/2026-06-30-per-user-ai-credit-budgets-available-for-cost-centers/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">changelog</a> before relying on it.
     </div>
   </div>
 
