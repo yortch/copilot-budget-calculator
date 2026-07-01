@@ -335,7 +335,7 @@ footer {
     <strong>⚠ Always verify against the latest documentation.</strong>
     These recipes automate the same controls the calculator helps you size. API shapes, SKU names, scopes, and feature availability change over time. Confirm every command against the official
     <a href="https://docs.github.com/en/billing/tutorials/control-costs-at-scale" target="_blank" rel="noopener">Controlling and tracking costs at scale</a> tutorial and the
-    <a href="https://docs.github.com/en/rest/enterprise-admin/billing?apiVersion=2022-11-28" target="_blank" rel="noopener">REST API endpoints for billing</a> reference before running them against production.
+    <a href="https://docs.github.com/en/enterprise-cloud@latest/rest/billing/budgets" target="_blank" rel="noopener">REST API endpoints for budgets</a> reference before running them against production.
   </div>
 
   <div class="card">
@@ -367,10 +367,7 @@ footer {
         <tr><td><code>COST_CENTER_ID</code></td><td>The UUID returned when you create a cost center</td></tr>
       </tbody>
     </table>
-    <div class="note">
-      <strong>Budget type &amp; SKU naming</strong>
-      These recipes use <code>budget_type=BundlePricing</code> with <code>budget_product_sku=ai_credits</code> to cover all AI credit usage, matching the <a href="https://raw.githubusercontent.com/github/docs/main/src/rest/data/ghec-2026-03-10/billing.json" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">billing REST schema</a>. The control-costs-at-scale tutorial shows an equivalent SKU-level form (<code>budget_type=SkuPricing</code>, <code>budget_product_sku=copilot_ai_credits</code>). If one form is rejected by your enterprise's API version, try the other.
-    </div>
+
   </div>
 
   <!-- LANGUAGE SELECTOR -->
@@ -397,7 +394,7 @@ footer {
     </div>
     <ul class="ref-list">
       <li>Reference: <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#enterprise-budget" target="_blank" rel="noopener">Enterprise budget — Budgets for usage-based billing</a></li>
-      <li>API: <a href="https://docs.github.com/en/rest/enterprise-admin/billing?apiVersion=2022-11-28#create-a-budget" target="_blank" rel="noopener">Create a budget</a></li>
+      <li>API: <a href="https://docs.github.com/en/enterprise-cloud@latest/rest/billing/budgets?apiVersion=2026-03-10#create-a-budget" target="_blank" rel="noopener">Create a budget</a></li>
     </ul>
 
     <div class="code-block">
@@ -450,7 +447,7 @@ JSON</code></pre>
     </div>
     <ul class="ref-list">
       <li>Reference: <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#user-level-budget" target="_blank" rel="noopener">User-level budget — Budgets for usage-based billing</a></li>
-      <li>API: <a href="https://docs.github.com/en/rest/enterprise-admin/billing?apiVersion=2022-11-28#create-a-budget" target="_blank" rel="noopener">Create a budget</a> · <a href="https://docs.github.com/en/rest/enterprise-admin/billing?apiVersion=2022-11-28#get-user-states-for-a-multi-user-budget" target="_blank" rel="noopener">Get per-user states</a></li>
+      <li>API: <a href="https://docs.github.com/en/enterprise-cloud@latest/rest/billing/budgets?apiVersion=2026-03-10#create-a-budget" target="_blank" rel="noopener">Create a budget</a> · <a href="https://docs.github.com/en/enterprise-cloud@latest/rest/billing/budgets?apiVersion=2026-03-10#get-user-states-for-a-multi-user-budget" target="_blank" rel="noopener">Get per-user states</a></li>
     </ul>
 
     <div class="code-block">
@@ -503,7 +500,7 @@ JSON</code></pre>
     </div>
     <ul class="ref-list">
       <li>Reference: <a href="https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#user-level-budget" target="_blank" rel="noopener">User-level budget — Budgets for usage-based billing</a></li>
-      <li>API: <a href="https://docs.github.com/en/rest/enterprise-admin/billing?apiVersion=2022-11-28#create-a-budget" target="_blank" rel="noopener">Create a budget</a></li>
+      <li>API: <a href="https://docs.github.com/en/enterprise-cloud@latest/rest/billing/budgets?apiVersion=2026-03-10#create-a-budget" target="_blank" rel="noopener">Create a budget</a></li>
     </ul>
 
     <div class="code-block">
@@ -558,7 +555,7 @@ JSON</code></pre>
     </div>
     <ul class="ref-list">
       <li>Reference: <a href="https://docs.github.com/en/billing/tutorials/control-costs-at-scale" target="_blank" rel="noopener">Controlling and tracking costs at scale</a> · <a href="https://docs.github.com/en/billing/reference/cost-center-allocation" target="_blank" rel="noopener">Cost center allocation for different products</a></li>
-      <li>API: <a href="https://docs.github.com/en/rest/enterprise-admin/billing?apiVersion=2022-11-28" target="_blank" rel="noopener">REST API endpoints for billing</a></li>
+      <li>API: <a href="https://docs.github.com/en/enterprise-cloud@latest/rest/billing/budgets?apiVersion=2026-03-10#create-a-budget" target="_blank" rel="noopener">Create a budget</a></li>
     </ul>
 
     <h3>4.1 — Create the cost center</h3>
@@ -807,10 +804,10 @@ JSON</code></pre>
     <h2>Managing budgets you create</h2>
     <p>Every <code>POST</code> to <code>/budgets</code> returns the new budget's <code>id</code>. Use these read/update/delete endpoints to manage them afterward:</p>
     <ul class="ref-list">
-      <li><code>GET /enterprises/$ENTERPRISE/settings/billing/budgets</code> — <a href="https://docs.github.com/en/rest/enterprise-admin/billing?apiVersion=2022-11-28#get-all-budgets" target="_blank" rel="noopener">List all budgets</a> (filter with <code>?scope=enterprise|cost_center|user|multi_user_customer|multi_user_cost_center</code>)</li>
-      <li><code>PATCH /enterprises/$ENTERPRISE/settings/billing/budgets/$BUDGET_ID</code> — <a href="https://docs.github.com/en/rest/enterprise-admin/billing?apiVersion=2022-11-28#update-a-budget" target="_blank" rel="noopener">Update a budget</a></li>
-      <li><code>DELETE /enterprises/$ENTERPRISE/settings/billing/budgets/$BUDGET_ID</code> — <a href="https://docs.github.com/en/rest/enterprise-admin/billing?apiVersion=2022-11-28#delete-a-budget" target="_blank" rel="noopener">Delete a budget</a></li>
-      <li><code>GET /enterprises/$ENTERPRISE/settings/billing/cost-centers</code> — <a href="https://docs.github.com/en/rest/enterprise-admin/billing?apiVersion=2022-11-28" target="_blank" rel="noopener">List cost centers</a> to discover existing <code>$COST_CENTER_ID</code> values</li>
+      <li><code>GET /enterprises/$ENTERPRISE/settings/billing/budgets</code> — <a href="https://docs.github.com/en/enterprise-cloud@latest/rest/billing/budgets?apiVersion=2026-03-10#get-all-budgets" target="_blank" rel="noopener">List all budgets</a> (filter with <code>?scope=enterprise|cost_center|user|multi_user_customer|multi_user_cost_center</code>)</li>
+      <li><code>PATCH /enterprises/$ENTERPRISE/settings/billing/budgets/$BUDGET_ID</code> — <a href="https://docs.github.com/en/enterprise-cloud@latest/rest/billing/budgets?apiVersion=2026-03-10#update-a-budget" target="_blank" rel="noopener">Update a budget</a></li>
+      <li><code>DELETE /enterprises/$ENTERPRISE/settings/billing/budgets/$BUDGET_ID</code> — <a href="https://docs.github.com/en/enterprise-cloud@latest/rest/billing/budgets?apiVersion=2026-03-10#delete-a-budget" target="_blank" rel="noopener">Delete a budget</a></li>
+      <li><code>GET /enterprises/$ENTERPRISE/settings/billing/cost-centers</code> — <a href="https://docs.github.com/en/enterprise-cloud@latest/rest/billing/budgets" target="_blank" rel="noopener">Budgets REST API</a> to discover existing <code>$COST_CENTER_ID</code> values</li>
     </ul>
     <div class="note">
       <strong>Ready-made automation</strong>
@@ -820,7 +817,7 @@ JSON</code></pre>
 
   <footer>
     Based on <a class="footer-link" href="https://docs.github.com/en/billing/tutorials/control-costs-at-scale" target="_blank" rel="noopener">Controlling and tracking costs at scale ↗</a>
-    and <a class="footer-link" href="https://docs.github.com/en/rest/enterprise-admin/billing?apiVersion=2022-11-28" target="_blank" rel="noopener">REST API endpoints for billing ↗</a>
+    and <a class="footer-link" href="https://docs.github.com/en/enterprise-cloud@latest/rest/billing/budgets" target="_blank" rel="noopener">REST API endpoints for budgets ↗</a>
     <div style="margin-top: 8px; font-weight: 600; color: var(--warn-text);">⚠ Always verify endpoints, scopes, and SKU names against the latest official GitHub documentation.</div>
   </footer>
 
