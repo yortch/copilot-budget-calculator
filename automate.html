@@ -344,7 +344,7 @@ footer {
       <li><a href="#s1">1. Create an enterprise budget</a></li>
       <li><a href="#s2">2. Create a default User-Level Budget (ULB)</a></li>
       <li><a href="#s3">3. Create an individual user budget</a></li>
-      <li><a href="#s4">4. Create a cost center &amp; cost center budget</a></li>
+      <li><a href="#s4">4. Create a cost center &amp; cost center budgets</a></li>
       <li><a href="#s46">5. Enable AI credit pools for cost centers <span class="new-badge">New · Jul 2, 2026</span></a></li>
     </ul>
   </div>
@@ -549,7 +549,7 @@ JSON</code></pre>
 
   <!-- SCENARIO 4 -->
   <div class="card" id="s4">
-    <h2><span class="num">4</span>Create a cost center &amp; cost center budget</h2>
+    <h2><span class="num">4</span>Create a cost center &amp; cost center budgets</h2>
     <div class="when-box">
       <strong>When to use</strong>
       Group users, teams, organizations, or repositories into a <strong>cost center</strong> when you want to track and cap spending for a financial entity (a department, business unit, or project team) separately from the rest of the enterprise. Cost centers also enable the "excluded cost center" pattern for power-user teams that must never be blocked by the enterprise budget. The steps below create the cost center, populate it, and then attach budgets.
@@ -825,7 +825,11 @@ JSON</code></pre>
       </div>
     </div>
 
-    <h3 id="s46">4.6 — Enable AI credit pools for cost centers <span class="new-badge">New · Jul 2, 2026</span></h3>
+  </div>
+
+  <!-- SCENARIO 5 -->
+  <div class="card" id="s46">
+    <h2><span class="num">5</span>Enable AI credit pools for cost centers <span class="new-badge">New · Jul 2, 2026</span></h2>
     <div class="when-box">
       <strong>When to use</strong>
       Cap how much of the enterprise's included AI credit pool a cost center can draw, independently from metered budgets. This keeps each cost center bounded to the included usage funded by its assigned Copilot licenses. You can use this together with 4.4 and 4.5: AI credit pool controls included usage phase, while cost center budgets control metered phase after pool exhaustion.
@@ -835,7 +839,7 @@ JSON</code></pre>
       <li>API: <a href="https://docs.github.com/en/enterprise-cloud@latest/rest/billing/cost-centers?apiVersion=2026-03-10" target="_blank" rel="noopener">Cost centers REST API</a></li>
     </ul>
 
-    <h3>4.6.1 — Enable AI credit pool on an existing cost center</h3>
+    <h3>5.1 — Enable AI credit pool on an existing cost center</h3>
     <div class="code-block">
       <div class="lang-gh">
         <div class="code-head"><span><span class="verb">PATCH</span> /enterprises/$ENTERPRISE/settings/billing/cost-centers/$COST_CENTER_ID</span><button class="copy-btn" type="button">Copy</button></div>
@@ -866,7 +870,7 @@ JSON</code></pre>
       </div>
     </div>
 
-    <h3>4.6.2 — Check AI credit pool state for a cost center</h3>
+    <h3>5.2 — Check AI credit pool state for a cost center</h3>
     <div class="code-block">
       <div class="lang-gh">
         <div class="code-head"><span><span class="verb">GET</span> /enterprises/$ENTERPRISE/settings/billing/cost-centers/$COST_CENTER_ID</span><button class="copy-btn" type="button">Copy</button></div>
