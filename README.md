@@ -120,6 +120,7 @@ After exclusion, the user is governed only by their cost center budget. The ente
 - **ULBs are always hard stops** — there is no "continue past limit" toggle for ULBs.
 - **Enterprise and cost center budgets only apply after the pool is exhausted** (metered phase).
 - **Cost center exclusion is the only way** to give a team or user spending authority beyond the enterprise cap.
+- **AI credit pools for cost centers** cap how much included-usage pool a cost center can draw; they are separate from metered budgets and can be combined with cost center budgets.
 - **A $0 budget at any level blocks usage immediately** for the users it applies to. If the Total Customer Budget is below license fees, do not set the enterprise budget to $0 — mark it as N/A.
 - **The enterprise budget is not a total monthly cap** — it only caps metered overage. Max bill = license fees + enterprise budget.
 - **[Budgets cannot look back](https://docs.github.com/en/billing/concepts/budgets-and-alerts#your-first-billing-cycle-after-creating-a-budget)** — they are effective from the day they are set. A mid-month start only governs the remaining days of that first month.
@@ -132,6 +133,8 @@ After exclusion, the user is governed only by their cost center budget. The ente
   - [User-level budget (ULB)](https://docs.github.com/en/copilot/concepts/billing/budgets-for-usage-based-billing#user-level-budget)
 - [Your first billing cycle after creating a budget — GitHub Docs](https://docs.github.com/en/billing/concepts/budgets-and-alerts#your-first-billing-cycle-after-creating-a-budget)
 - [Manage billing for enterprise — GitHub Docs](https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-for-enterprise/manage-billing-for-enterprise)
+- [Cost centers now support AI credit pools — GitHub Changelog (Jul 2, 2026)](https://github.blog/changelog/2026-07-02-cost-centers-now-support-included-usage-caps/)
+- [Cost centers — GitHub REST API](https://docs.github.com/en/enterprise-cloud@latest/rest/billing/cost-centers?apiVersion=2026-03-10)
 
 ## Disclaimer
 
